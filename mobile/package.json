@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ptomasroos/react-native-multi-slider": "^2.2.2",
+    "@react-native-community/checkbox": "^0.5.8",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "6.0.0",
     "@react-navigation/drawer": "^5.12.5",

@@ -27,7 +27,7 @@ const UserNavigation = () => {
 
     return (
         <UserDrawer.Navigator
-            initialRouteName='ReadProductNav'
+            initialRouteName='CreateProfileNav'
             drawerContent={renderDrawerContent}
             detachInactiveScreens={true}
         >

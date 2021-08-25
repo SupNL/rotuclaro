@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Header from 'components/Header';
+import CheckBox from '@react-native-community/checkbox';
 import { StyleSheet, ScrollView, View } from 'react-native';
 import { Form } from '@unform/mobile';
 
@@ -12,10 +13,12 @@ const DefineCutValues = ({ navigation, route }) => {
     const formRef = useRef(null);
     const baseValue = Number(route.params.baseValue) * 100;
 
+    const [check, setCheck] = useState(false);
+
     const handleSubmit = (data) => {
         navigation.navigate('ChooseAlergenicComponents', {
-            baseValue : baseValue,
-            limitValues : data,
+            baseValue: baseValue,
+            limitValues: data,
         });
     };
 
@@ -44,35 +47,23 @@ const DefineCutValues = ({ navigation, route }) => {
                     initialData={{
                         // em 100g,
                         'kcal-slider': [baseValue * 3, baseValue * 5],
-                        'carbo-slider': [
-                            (0.6) * baseValue, 
-                            (0.8) * baseValue
-                        ],
+                        'carbo-slider': [0.6 * baseValue, 0.8 * baseValue],
                         // 100g, alerta em 10g e 15g
-                        'sugar-slider': [
-                            (0.1) * baseValue, 
-                            (0.15) * baseValue
-                        ],
+                        'sugar-slider': [0.1 * baseValue, 0.15 * baseValue],
                         // 100g, alerta em 10g e 20g
-                        'fat-slider': [
-                            (0.1) * baseValue, 
-                            (0.2) * baseValue
-                        ],
+                        'fat-slider': [0.1 * baseValue, 0.2 * baseValue],
                         // 100g, alerta em 2g e 5g
                         'fat-trans-slider': [
-                            (0.02) * baseValue, 
-                            (0.05) * baseValue
+                            0.02 * baseValue,
+                            0.05 * baseValue,
                         ],
                         // 100g, alerta em 4g e 10g
                         'fat-saturated-slider': [
-                            (0.04) * baseValue, 
-                            (0.1) * baseValue
+                            0.04 * baseValue,
+                            0.1 * baseValue,
                         ],
                         // 100g, alerta em 3mg e 6mg
-                        'sodium-slider': [
-                            (0.003) * baseValue,
-                            (0.006) * baseValue,
-                        ],
+                        'sodium-slider': [0.003 * baseValue, 0.006 * baseValue],
                     }}
                     style={styles.align}
                 >
@@ -110,22 +101,37 @@ const DefineCutValues = ({ navigation, route }) => {
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
-                    <CustomSlider
-                        name='fat-trans-slider'
-                        maxValue={baseValue / 2}
-                        label={`Gorduras trans em ${baseValue / 100} g`}
-                        suffix=' g'
-                        labelLeft='MÉDIO: '
-                        labelRight='ALTO: '
-                    />
-                    <CustomSlider
-                        name='fat-saturated-slider'
-                        maxValue={baseValue / 2}
-                        label={`Gorduras saturadas em ${baseValue / 100} g`}
-                        suffix=' g'
-                        labelLeft='MÉDIO: '
-                        labelRight='ALTO: '
-                    />
+                    <View style={styles.checkboxContainer}>
+                        <CheckBox value={check} onChange={() => {
+                           setCheck(old => !old);
+                        }} />
+                        <CustomText>
+                            Apresentar gorduras saturadas e trans
+                        </CustomText>
+                    </View>
+
+                    {check && (
+                        <>
+                            <CustomSlider
+                                name='fat-trans-slider'
+                                maxValue={baseValue / 2}
+                                label={`Gorduras trans em ${baseValue / 100} g`}
+                                suffix=' g'
+                                labelLeft='MÉDIO: '
+                                labelRight='ALTO: '
+                            />
+                            <CustomSlider
+                                name='fat-saturated-slider'
+                                maxValue={baseValue / 2}
+                                label={`Gorduras saturadas em ${
+                                    baseValue / 100
+                                } g`}
+                                suffix=' g'
+                                labelLeft='MÉDIO: '
+                                labelRight='ALTO: '
+                            />
+                        </>
+                    )}
                     <CustomSlider
                         name='sodium-slider'
                         maxValue={baseValue / 20}
@@ -150,6 +156,10 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     align: {
+        alignItems: 'center',
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
     },
 });
