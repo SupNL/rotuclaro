@@ -1,8 +1,10 @@
 import 'reflect-metadata';
+import { createConnection } from 'typeorm';
 import app from './app';
 
-console.log('iniciando');
-
-app.listen(3000, () => {
-    console.log('Servidor iniciado');
+createConnection().then(() => {
+    app.listen(3333, () => {
+        console.log('Servidor iniciado');
+    });
 });
+
