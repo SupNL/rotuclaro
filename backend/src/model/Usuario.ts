@@ -41,6 +41,13 @@ export class Usuario {
     senha: string;
 
     @Column({
+        type: 'bool',
+        name: 'ativo',
+        nullable : false,
+    })
+    ativo : boolean;
+
+    @Column({
         type: 'enum',
         enum: NivelUsuario,
         default: NivelUsuario.COMUM,
