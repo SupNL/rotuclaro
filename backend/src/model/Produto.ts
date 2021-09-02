@@ -23,6 +23,13 @@ export class Produto {
 
     @Column({
         type: 'real',
+        name: 'gramas_porcao',
+        nullable: false,
+    })
+    gramasPorcao: number;
+
+    @Column({
+        type: 'real',
         name: 'kcal',
         nullable: false,
     })
