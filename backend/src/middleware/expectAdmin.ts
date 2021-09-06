@@ -8,7 +8,7 @@ export function expectAdmin(
 ): unknown {
     if (!req.usuario) {
         return res
-            .status(500)
+            .status(400)
             .json({ message: 'Erro com a autenticação' });
     }
 
