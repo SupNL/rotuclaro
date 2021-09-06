@@ -2,10 +2,13 @@ import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
 import { FindManyOptions } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
+import { expectAdmin } from '../../middleware/expectAdmin';
+import { produtoLimiter } from '../../middleware/limitRequests';
+import { handleQueryFailedError } from '../../utils/errorHandler';
 
 const rotaProduto = Router();
 
-rotaProduto.get('/', async (req, res) => {
+rotaProduto.get('/', expectAdmin, async (req, res) => {
     try {
         const options: FindManyOptions = {};
 
@@ -38,27 +41,46 @@ rotaProduto.get('/', async (req, res) => {
     }
 });
 
-rotaProduto.get('/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (isNaN(parseInt(id))) {
+rotaProduto.get(
+    '/:codigo_ou_id',
+    celebrate({
+        [Segments.HEADERS]: Joi.object()
+            .keys({
+                imei: Joi.string().required().min(1),
+            })
+            .unknown(),
+    }),
+    produtoLimiter,
+    async (req, res) => {
+        try {
+            const { codigo_ou_id } = req.params;
+
+            const produtos = await ControleProduto.findMany({
+                where: [
+                    {
+                        codigo: codigo_ou_id,
+                    },
+                    {
+                        id: codigo_ou_id.length > 10 ? undefined : codigo_ou_id,
+                    },
+                ],
+                relations: ['componentesAlergenicos'],
+            });
+            if (produtos.length > 0) {
+                const produto = produtos[0];
+                return res.status(200).json(produto);
+            }
             return res.status(404).json({ message: 'Não encontrado' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Erro de servidor' });
         }
-
-        const produto = await ControleProduto.findOne(parseInt(id), {
-            relations: ['componentesAlergenicos'],
-        });
-
-        if (produto) return res.status(200).json(produto);
-        return res.status(404).json({ message: 'Não encontrado' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Erro de servidor' });
     }
-});
+);
 
 rotaProduto.post(
     '/',
+    expectAdmin,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().required().min(1),
@@ -85,18 +107,19 @@ rotaProduto.post(
     }),
     async (req, res) => {
         try {
-            const produto = await ControleProduto.create(req.body);
+            const instance = ControleProduto.convertBody(req.body);
+            const produto = await ControleProduto.create(instance);
 
             return res.status(201).json(produto);
         } catch (err) {
-            console.error(err);
-            return res.status(500).json({ message: 'Erro de servidor' });
+            handleQueryFailedError(err, req, res);
         }
     }
 );
 
 rotaProduto.put(
     '/:id',
+    expectAdmin,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().optional().min(1),
@@ -140,13 +163,12 @@ rotaProduto.put(
 
             return res.status(200).json(produto);
         } catch (err) {
-            console.error(err);
-            return res.status(500).json({ message: 'Erro de servidor' });
+            handleQueryFailedError(err, req, res);
         }
     }
 );
 
-rotaProduto.delete('/:id', async (req, res) => {
+rotaProduto.delete('/:id', expectAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         if (isNaN(parseInt(id))) {
