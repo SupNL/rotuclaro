@@ -2,6 +2,7 @@ import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
 import { FindManyOptions } from 'typeorm';
 import ControleComponenteAlergenico from '../../controller/ControleComponenteAlergenico';
+import { expectAdmin } from '../../middleware/expectAdmin';
 
 const rotaComponente = Router();
 
@@ -41,6 +42,7 @@ rotaComponente.get('/', async (req, res) => {
 
 rotaComponente.post(
     '/',
+    expectAdmin,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().required().min(1),
@@ -48,8 +50,9 @@ rotaComponente.post(
     }),
     async (req, res) => {
         try {
+            const instance = ControleComponenteAlergenico.convertBody(req.body);
             const componenteAlergenico =
-                await ControleComponenteAlergenico.create(req.body);
+                await ControleComponenteAlergenico.create(instance);
 
             return res.status(201).json(componenteAlergenico);
         } catch (err) {
@@ -61,6 +64,7 @@ rotaComponente.post(
 
 rotaComponente.put(
     '/:id',
+    expectAdmin,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().optional().min(1),
@@ -94,6 +98,7 @@ rotaComponente.put(
 
 rotaComponente.delete(
     '/:id',
+    expectAdmin,
     async (req, res) => {
         try {
             const { id } = req.params;
