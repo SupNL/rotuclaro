@@ -14,54 +14,111 @@ export class Perfil {
     })
     gramas: number;
 
-    @Column({
-        type: 'real',
-        name: 'limite_kcal',
-        nullable: false,
-    })
-    limiteKcal: number;
 
     @Column({
         type: 'real',
-        name: 'limite_carboidratos',
+        name: 'limite_medio_kcal',
         nullable: false,
     })
-    limiteCarboidratos: number;
+    limiteMedioKcal: number;
 
     @Column({
         type: 'real',
-        name: 'limite_acucares',
+        name: 'limite_alto_kcal',
         nullable: false,
     })
-    limiteAcucares: number;
+    limiteAltoKcal: number;
+
 
     @Column({
         type: 'real',
-        name: 'limite_gorduras_totais',
+        name: 'limite_medio_carboidratos',
         nullable: false,
     })
-    limiteGordurasTotais: number;
+    limiteMedioCarboidratos: number;
 
     @Column({
         type: 'real',
-        name: 'limite_gorduras_trans',
+        name: 'limite_alto_carboidratos',
         nullable: false,
     })
-    limiteGordurasTrans: number;
+    limiteAltoCarboidratos: number;
+
 
     @Column({
         type: 'real',
-        name: 'limite_gorduras_saturadas',
+        name: 'limite_medio_acucares',
         nullable: false,
     })
-    limiteGordurasSaturadas: number;
+    limiteMedioAcucares: number;
 
     @Column({
         type: 'real',
-        name: 'limite_sodio',
+        name: 'limite_alto_acucares',
         nullable: false,
     })
-    limiteSodio: number;
+    limiteAltoAcucares: number;
+
+
+    @Column({
+        type: 'real',
+        name: 'limite_medio_gorduras_totais',
+        nullable: false,
+    })
+    limiteMedioGordurasTotais: number;
+
+    @Column({
+        type: 'real',
+        name: 'limite_alto_gorduras_totais',
+        nullable: false,
+    })
+    limiteAltoGordurasTotais: number;
+
+
+    @Column({
+        type: 'real',
+        name: 'limite_medio_gorduras_trans',
+        nullable: false,
+    })
+    limiteMedioGordurasTrans: number;
+
+    @Column({
+        type: 'real',
+        name: 'limite_alto_gorduras_trans',
+        nullable: false,
+    })
+    limiteAltoGordurasTrans: number;
+
+
+    @Column({
+        type: 'real',
+        name: 'limite_medio_gorduras_saturadas',
+        nullable: false,
+    })
+    limiteMedioGordurasSaturadas: number;
+
+    @Column({
+        type: 'real',
+        name: 'limite_alto_gorduras_saturadas',
+        nullable: false,
+    })
+    limiteAltoGordurasSaturadas: number;
+
+
+    @Column({
+        type: 'real',
+        name: 'limite_medio_sodio',
+        nullable: false,
+    })
+    limiteMedioSodio: number;
+
+    @Column({
+        type: 'real',
+        name: 'limite_alto_sodio',
+        nullable: false,
+    })
+    limiteAltoSodio: number;
+
 
     @ManyToMany(() => ComponenteAlergenico)
     @JoinTable({
