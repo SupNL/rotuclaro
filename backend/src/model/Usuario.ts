@@ -1,10 +1,13 @@
 import {
+    BeforeInsert,
     Column,
     Entity,
     JoinColumn,
     OneToOne,
     PrimaryGeneratedColumn,
 } from 'typeorm';
+import { genSalt, hash } from 'bcryptjs';
+
 import { Perfil } from './Perfil';
 
 export enum NivelUsuario {
@@ -15,6 +18,11 @@ export enum NivelUsuario {
 
 @Entity({ name: 'usuario' })
 export class Usuario {
+    @BeforeInsert()
+    async hashPassword() : Promise<void> {
+        this.senha = await hash(this.senha, 10);
+    }
+
     @PrimaryGeneratedColumn({ name: 'id' })
     id: number;
 
@@ -30,6 +38,7 @@ export class Usuario {
         name: 'login',
         unique: true,
         nullable: false,
+        select: false,
     })
     login: string;
 
@@ -37,6 +46,7 @@ export class Usuario {
         type: 'varchar',
         name: 'senha',
         nullable: false,
+        select: false,
     })
     senha: string;
 
@@ -44,6 +54,8 @@ export class Usuario {
         type: 'bool',
         name: 'ativo',
         nullable : false,
+        default : true,
+        select: false,
     })
     ativo : boolean;
 
