@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import routing from './routes';
 import { errors } from 'celebrate';
+import { serverLimiter } from './middleware/limitRequests';
 
 const app = express();
-
+app.use(serverLimiter);
 app.use(
     cors({
         origin: '*',
