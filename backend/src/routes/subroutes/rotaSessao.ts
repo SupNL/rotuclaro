@@ -23,7 +23,7 @@ rotaSessao.post(
                 where: {
                     login: login,
                 },
-                select: ['id', 'senha', 'nivel'],
+                select: ['id', 'nome', 'senha', 'nivel'],
             });
 
             const usuario = usuarios[0];
@@ -47,7 +47,7 @@ rotaSessao.post(
                 );
                 return res
                     .status(200)
-                    .json({ message: 'Autenticado', token: token });
+                    .json({ message: 'Autenticado', token: token, usuario : usuario });
             }
             return res.status(401).json({ message: 'Credenciais incorretas' });
         } catch (err) {
