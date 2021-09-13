@@ -5,13 +5,43 @@ import { Form } from '@unform/mobile';
 import Input from 'components/Input';
 import CustomButton from 'components/CustomButton';
 import sharedStyles from 'shared/sharedStyles';
+import { useAuth } from 'hooks/useAuth';
+import ShowToast from 'utils/ShowToast';
 
 const Login = ({ navigation }) => {
     const formRef = useRef(null);
+    const { signIn } = useAuth();
 
     const handleSubmit = (data) => {
-        console.log(data);
-        navigation.replace('UserNav');
+        formRef.current.setErrors({});
+        const errorList = {};
+        if (data.username == null) {
+            errorList.username = 'Nome de usuário obrigatório';
+        }
+        if (data.password == null) {
+            errorList.password = 'Senha obrigatória';
+        }
+        if (Object.keys(errorList).length) {
+            formRef.current.setErrors(errorList);
+        } else {
+            signIn(data.username, data.password)
+                .then(({ usuario }) => {
+                    if (usuario.nivel == 0) {
+                        navigation.replace('AdminNav');
+                    } else {
+                        navigation.replace('UserNav');
+                    }
+                })
+                .catch((err) => {
+                    if (err.response.status == 401) {
+                        ShowToast(err.response.data.message);
+                    } else {
+                        ShowToast(
+                            'Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                        );
+                    }
+                });
+        }
     };
 
     return (
@@ -25,14 +55,14 @@ const Login = ({ navigation }) => {
                     name='username'
                     label='Nome de usuário'
                     placeholder='Nome de usuário'
-                    style={{ box: { marginBottom: 8 } }}
+                    style={{ marginBottom: 8 }}
                 />
                 <Input
                     name='password'
                     label='Senha'
                     placeholder='Senha'
                     type='password'
-                    style={{ box: { marginBottom: 8 } }}
+                    style={{ marginBottom: 8 }}
                 />
                 <CustomButton
                     title='Entrar'
