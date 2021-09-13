@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import { Text, View, Dimensions } from 'react-native';
 import { useField } from '@unform/core';
 import { useState } from 'react';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
@@ -7,6 +7,7 @@ import MultiSlider from '@ptomasroos/react-native-multi-slider';
 function CustomSlider({
     name,
     onChangeText,
+    minValue,
     maxValue,
     label,
     suffix,
@@ -64,9 +65,10 @@ function CustomSlider({
             {labelLeft && <Text>{labelLeft + leftValue / 100}{suffix}</Text>}
             {labelRight && <Text>{labelRight + rightValue / 100}{suffix}</Text>}
             <MultiSlider
+                step={10}
                 sliderLength={deviceWidth * 0.8}
                 values={[leftValue , rightValue]}
-                min={0}
+                min={minValue ? minValue : 0}
                 max={maxValue ? maxValue : 1000}
                 name={fieldName}
                 ref={sliderRef}
@@ -78,7 +80,5 @@ function CustomSlider({
         </View>
     );
 }
-
-const styles = StyleSheet.create({});
 
 export default CustomSlider;
