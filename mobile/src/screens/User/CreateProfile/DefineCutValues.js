@@ -11,9 +11,12 @@ import CustomSlider from 'components/CustomSlider';
 
 const DefineCutValues = ({ navigation, route }) => {
     const formRef = useRef(null);
-    const baseValue = Number(route.params.baseValue) * 100;
+    const baseValue = Number(route.params.baseValue);
+    const proportionalBaseValue = baseValue * 100;
 
     const [check, setCheck] = useState(false);
+
+    const minValue = 10;
 
     const handleSubmit = (data) => {
         navigation.navigate('ChooseAlergenicComponents', {
@@ -46,32 +49,48 @@ const DefineCutValues = ({ navigation, route }) => {
                     onSubmit={handleSubmit}
                     initialData={{
                         // em 100g,
-                        'kcal-slider': [baseValue * 3, baseValue * 5],
-                        'carbo-slider': [0.6 * baseValue, 0.8 * baseValue],
+                        'kcal-slider': [
+                            proportionalBaseValue * 3,
+                            proportionalBaseValue * 5,
+                        ],
+                        'carbo-slider': [
+                            0.6 * proportionalBaseValue,
+                            0.8 * proportionalBaseValue,
+                        ],
                         // 100g, alerta em 10g e 15g
-                        'sugar-slider': [0.1 * baseValue, 0.15 * baseValue],
+                        'sugar-slider': [
+                            0.1 * proportionalBaseValue,
+                            0.15 * proportionalBaseValue,
+                        ],
                         // 100g, alerta em 10g e 20g
-                        'fat-slider': [0.1 * baseValue, 0.2 * baseValue],
+                        'fat-slider': [
+                            0.1 * proportionalBaseValue,
+                            0.2 * proportionalBaseValue,
+                        ],
                         // 100g, alerta em 2g e 5g
                         'fat-trans-slider': [
-                            0.02 * baseValue,
-                            0.05 * baseValue,
+                            0.02 * proportionalBaseValue,
+                            0.05 * proportionalBaseValue,
                         ],
                         // 100g, alerta em 4g e 10g
                         'fat-saturated-slider': [
-                            0.04 * baseValue,
-                            0.1 * baseValue,
+                            0.04 * proportionalBaseValue,
+                            0.1 * proportionalBaseValue,
                         ],
                         // 100g, alerta em 3mg e 6mg
-                        'sodium-slider': [0.003 * baseValue, 0.006 * baseValue],
+                        'sodium-slider': [
+                            0.003 * proportionalBaseValue,
+                            0.006 * proportionalBaseValue,
+                        ],
                     }}
                     style={styles.align}
                 >
                     <CustomSlider
                         name='kcal-slider'
-                        maxValue={baseValue * 10}
+                        minValue={minValue}
+                        maxValue={proportionalBaseValue * 10}
                         label={`Valor energético (Kcal) em ${
-                            baseValue / 100
+                            proportionalBaseValue / 100
                         } g`}
                         suffix=' Kcal'
                         labelLeft='MÉDIO: '
@@ -79,32 +98,42 @@ const DefineCutValues = ({ navigation, route }) => {
                     />
                     <CustomSlider
                         name='carbo-slider'
-                        maxValue={baseValue}
-                        label={`Carboidratos em ${baseValue / 100} g`}
+                        minValue={minValue}
+                        maxValue={proportionalBaseValue}
+                        label={`Carboidratos em ${
+                            proportionalBaseValue / 100
+                        } g`}
                         suffix=' g'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='sugar-slider'
-                        maxValue={baseValue / 2}
-                        label={`Açúcares em ${baseValue / 100} g`}
+                        minValue={minValue}
+                        maxValue={proportionalBaseValue / 2}
+                        label={`Açúcares em ${proportionalBaseValue / 100} g`}
                         suffix=' g'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='fat-slider'
-                        maxValue={baseValue}
-                        label={`Gorduras totais em ${baseValue / 100} g`}
+                        minValue={minValue}
+                        maxValue={proportionalBaseValue}
+                        label={`Gorduras totais em ${
+                            proportionalBaseValue / 100
+                        } g`}
                         suffix=' g'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <View style={styles.checkboxContainer}>
-                        <CheckBox value={check} onChange={() => {
-                           setCheck(old => !old);
-                        }} />
+                        <CheckBox
+                            value={check}
+                            onChange={() => {
+                                setCheck((old) => !old);
+                            }}
+                        />
                         <CustomText>
                             Apresentar gorduras saturadas e trans
                         </CustomText>
@@ -114,17 +143,21 @@ const DefineCutValues = ({ navigation, route }) => {
                         <>
                             <CustomSlider
                                 name='fat-trans-slider'
-                                maxValue={baseValue / 2}
-                                label={`Gorduras trans em ${baseValue / 100} g`}
+                                minValue={minValue}
+                                maxValue={proportionalBaseValue / 2}
+                                label={`Gorduras trans em ${
+                                    proportionalBaseValue / 100
+                                } g`}
                                 suffix=' g'
                                 labelLeft='MÉDIO: '
                                 labelRight='ALTO: '
                             />
                             <CustomSlider
                                 name='fat-saturated-slider'
-                                maxValue={baseValue / 2}
+                                minValue={minValue}
+                                maxValue={proportionalBaseValue / 2}
                                 label={`Gorduras saturadas em ${
-                                    baseValue / 100
+                                    proportionalBaseValue / 100
                                 } g`}
                                 suffix=' g'
                                 labelLeft='MÉDIO: '
@@ -134,8 +167,11 @@ const DefineCutValues = ({ navigation, route }) => {
                     )}
                     <CustomSlider
                         name='sodium-slider'
-                        maxValue={baseValue / 20}
-                        label={`Sal (sódio) em ${baseValue / 100} g`}
+                        minValue={minValue}
+                        maxValue={proportionalBaseValue / 20}
+                        label={`Sal (sódio) em ${
+                            proportionalBaseValue / 100
+                        } g`}
                         suffix=' g'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '

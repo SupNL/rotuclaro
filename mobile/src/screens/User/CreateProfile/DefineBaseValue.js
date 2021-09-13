@@ -12,10 +12,16 @@ const DefineBaseValue = ({ navigation }) => {
     const formRef = useRef(null);
 
     const handleSubmit = (data) => {
-        console.log(data);
-        navigation.navigate('DefineCutValues', {
-            baseValue : data['base-value']
-        });
+        formRef.current.setErrors({});
+        if (Number(data['base-value']) == 0) {
+            formRef.current.setErrors({
+                'base-value': 'Informe um número maior que zero.',
+            });
+        } else {
+            navigation.navigate('DefineCutValues', {
+                baseValue: data['base-value'],
+            });
+        }
     };
 
     return (
@@ -44,7 +50,7 @@ const DefineBaseValue = ({ navigation }) => {
                     suffix='g'
                     style={{
                         text: { textAlign: 'right' },
-                        box: { marginBottom: 8 },
+                        marginBottom: 8,
                     }}
                 />
                 <CustomButton
