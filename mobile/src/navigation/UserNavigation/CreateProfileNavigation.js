@@ -1,8 +1,8 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import DefineBaseValue from 'screens/CreateProfile/DefineBaseValue';
-import DefineCutValues from 'screens/CreateProfile/DefineCutValues';
-import ChooseAlergenicComponents from 'screens/CreateProfile/ChooseAlergenicComponents';
+import DefineBaseValue from 'screens/User/CreateProfile/DefineBaseValue';
+import DefineCutValues from 'screens/User/CreateProfile/DefineCutValues';
+import ChooseAlergenicComponents from 'screens/User/CreateProfile/ChooseAlergenicComponents';
 
 const CreateProfileNavigation = () => {
     const ProfileStack = createStackNavigator();
@@ -16,9 +16,6 @@ const CreateProfileNavigation = () => {
             <ProfileStack.Screen
                 name='DefineBaseValue'
                 component={DefineBaseValue}
-                options={{
-                    
-                }}
             />
             <ProfileStack.Screen
                 name='DefineCutValues'
