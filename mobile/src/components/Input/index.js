@@ -3,6 +3,7 @@ import { Text, View, TextInput, StyleSheet } from 'react-native';
 import { useField } from '@unform/core';
 import COLORS from 'shared/COLORS';
 import { useState } from 'react';
+import InputErrorText from 'components/InputErrorText';
 
 function Input({
     name,
@@ -15,7 +16,7 @@ function Input({
     ...rest
 }) {
     const inputRef = useRef(null);
-    const { fieldName, registerField, defaultValue } = useField(name);
+    const { fieldName, registerField, defaultValue, error } = useField(name);
     const [currentValue, setCurrentValue] = useState(defaultValue);
 
     useEffect(() => {
@@ -46,8 +47,8 @@ function Input({
 
     const handleChangeText = useCallback(
         (text) => {
-            if(type === 'number') {
-                if(!text.match(/^(([0-9])*((\.|,)[0-9]{0,2})?)$/)) {
+            if (type === 'number') {
+                if (!text.match(/^(([0-9])*((\.|,)[0-9]{0,2})?)$/)) {
                     return;
                 }
             }
@@ -59,9 +60,9 @@ function Input({
     );
 
     return (
-        <>
+        <View style={{ ...style }}>
             {label && <Text>{label}</Text>}
-            <View style={{...styles.textInputWrapper, ...style.box}}>
+            <View style={{ ...styles.textInputWrapper, ...style?.box }}>
                 {prefix && (
                     <View style={styles.boxes}>
                         <Text style={styles.textBoxes}>{prefix}</Text>
@@ -72,7 +73,7 @@ function Input({
                     value={currentValue}
                     onChangeText={handleChangeText}
                     defaultValue={defaultValue}
-                    style={{ ...styles.input, ...style.text }}
+                    style={{ ...styles.input, ...style?.text }}
                     secureTextEntry={type === 'password' ? true : false}
                     keyboardType={type === 'number' ? 'decimal-pad' : 'default'}
                     {...rest}
@@ -83,7 +84,8 @@ function Input({
                     </View>
                 )}
             </View>
-        </>
+            {error && <InputErrorText>{error}</InputErrorText>}
+        </View>
     );
 }
 
@@ -104,10 +106,10 @@ const styles = StyleSheet.create({
         borderColor: COLORS.black,
         paddingHorizontal: 4,
     },
-    textBoxes : {
-        fontSize : 20,
+    textBoxes: {
+        fontSize: 20,
         fontWeight: 'bold',
-    }
+    },
 });
 
 export default Input;
