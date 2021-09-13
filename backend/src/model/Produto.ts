@@ -1,8 +1,46 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Column,
+    Entity,
+    JoinTable,
+    ManyToMany,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ComponenteAlergenico } from './ComponenteAlergenico';
 
 @Entity({ name: 'produto' })
 export class Produto {
+    constructor(
+        codigo?: string,
+        nome?: string,
+        gramasPorcao?: number,
+        kcal?: number,
+        carboidratos?: number,
+        acucares?: number,
+        gorduras?: number,
+        gordurasSaturadas?: number,
+        gordurasTrans?: number,
+        sodio?: number,
+        proteinas?: number,
+        fibras?: number,
+        ingredientes?: string,
+        componentesAlergenicos?: ComponenteAlergenico[]
+    ) {
+        this.codigo = codigo;
+        this.nome = nome;
+        this.gramasPorcao = gramasPorcao;
+        this.kcal = kcal;
+        this.carboidratos = carboidratos;
+        this.acucares = acucares;
+        this.gorduras = gorduras;
+        this.gordurasSaturadas = gordurasSaturadas;
+        this.gordurasTrans = gordurasTrans;
+        this.sodio = sodio;
+        this.proteinas = proteinas;
+        this.fibras = fibras;
+        this.ingredientes = ingredientes;
+        this.componentesAlergenicos = componentesAlergenicos;
+    }
+
     @PrimaryGeneratedColumn({ name: 'id' })
     id: number;
 
@@ -103,12 +141,12 @@ export class Produto {
         name: 'componentes_produtos',
         joinColumn: {
             name: 'id_produto',
-            referencedColumnName: 'id'
+            referencedColumnName: 'id',
         },
         inverseJoinColumn: {
             name: 'id_componente',
             referencedColumnName: 'id',
-        }
+        },
     })
-    componentesAlergenicos : ComponenteAlergenico[]
+    componentesAlergenicos: ComponenteAlergenico[];
 }
