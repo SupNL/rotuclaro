@@ -130,7 +130,7 @@ rotaPerfil.post(
 
             if (checkPerfil.length > 0) {
                 return res
-                    .status(201)
+                    .status(409)
                     .json({ message: 'Perfil já cadastrado' });
             }
 
