@@ -14,6 +14,7 @@ export default {
     findMany(
         findOptions?: FindManyOptions
     ): Promise<Perfil[]> {
+        
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(Perfil);
@@ -63,6 +64,7 @@ export default {
     ): Promise<Perfil> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
+            
             connection
                 .transaction(async (manager) => {
                     const repo = manager.getRepository(Perfil);

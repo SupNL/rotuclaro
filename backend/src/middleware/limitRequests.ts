@@ -2,8 +2,8 @@ import { Request } from 'express';
 import rateLimit from 'express-rate-limit';
 
 function customImeiKeyGenerator(req : Request) {
-    const imei = req.headers['imei'];
-    return `${req.ip}+${imei}`;
+    const idUnico = req.headers.idUnico;
+    return `${req.ip}+${idUnico}`;
 }
 
 export const serverLimiter = rateLimit({
@@ -21,4 +21,5 @@ export const accountCreationLimiter = rateLimit({
     windowMs: 2 * 60 * 1000,
     max: 1,
     keyGenerator : customImeiKeyGenerator,
+    skipFailedRequests : true,
 });

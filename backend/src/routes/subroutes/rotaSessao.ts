@@ -24,6 +24,7 @@ rotaSessao.post(
                     login: login,
                 },
                 select: ['id', 'nome', 'senha', 'nivel'],
+                relations : ['perfil']
             });
 
             const usuario = usuarios[0];
@@ -43,7 +44,10 @@ rotaSessao.post(
                         id: usuario.id,
                         nivel: usuario.nivel,
                     },
-                    process.env.SERVER_SECRET
+                    process.env.SERVER_SECRET,
+                    {
+                        expiresIn : '2 hours'
+                    }
                 );
                 return res
                     .status(200)

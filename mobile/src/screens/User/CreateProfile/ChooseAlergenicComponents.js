@@ -10,17 +10,20 @@ import ConfirmDialog from 'components/ConfirmDialog';
 import SelectableComponent from 'components/SelectableComponent';
 import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
+import { useAuth } from 'hooks/useAuth';
 
 const ChooseAlergenicComponents = ({ navigation, route }) => {
     const [components, setComponents] = useState([]);
     const [selectedComponents, setSelectedComponents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const { signOut } = useAuth();
+
     const routeParams = route.params;
 
     const fetchComponents = (tokenSource) => {
-        api.get('/componente_alergenico', { cancelToken: tokenSource }).then(
-            (response) => {
+        api.get('/componente_alergenico', { cancelToken: tokenSource })
+            .then((response) => {
                 const data = response.data;
                 const componentesFromApi = data.map((componente) => {
                     return {
@@ -30,36 +33,47 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                 });
                 setComponents(componentesFromApi);
                 setIsLoading(false);
-            }
-        );
+            })
+            .catch((err) => {
+                if (err.response.status == 401) {
+                    ShowToast('Sessão expirada.');
+                    signOut();
+                } else if (err.response.status == 429) {
+                    ShowToast('Muitas requisições feitas, aguarde um pouco.');
+                } else {
+                    ShowToast(
+                        'Ocorreu um erro inesperado, tente novamente mais tarde.'
+                    );
+                }
+            });
     };
 
     const handleSubmit = () => {
         const limitValues = routeParams.limitValues;
         const submitData = {
             gramas: routeParams.baseValue,
-            limiteMedioKcal: limitValues['kcal-slider'][0],
-            limiteAltoKcal: limitValues['kcal-slider'][1],
-            limiteMedioCarboidratos: limitValues['carbo-slider'][0],
-            limiteAltoCarboidratos: limitValues['carbo-slider'][1],
-            limiteMedioAcucares: limitValues['sugar-slider'][0],
-            limiteAltoAcucares: limitValues['sugar-slider'][1],
-            limiteMedioGordurasTotais: limitValues['fat-slider'][0],
-            limiteAltoGordurasTotais: limitValues['fat-slider'][1],
+            limiteMedioKcal: limitValues['kcal-slider'][0] / 100,
+            limiteAltoKcal: limitValues['kcal-slider'][1] / 100,
+            limiteMedioCarboidratos: limitValues['carbo-slider'][0] / 100,
+            limiteAltoCarboidratos: limitValues['carbo-slider'][1] / 100,
+            limiteMedioAcucares: limitValues['sugar-slider'][0] / 100,
+            limiteAltoAcucares: limitValues['sugar-slider'][1] / 100,
+            limiteMedioGordurasTotais: limitValues['fat-slider'][0] / 100,
+            limiteAltoGordurasTotais: limitValues['fat-slider'][1] / 100,
             limiteMedioGordurasTrans: limitValues['fat-trans-slider']
-                ? limitValues['fat-trans-slider'][0]
+                ? limitValues['fat-trans-slider'][0] / 100
                 : 0,
             limiteAltoGordurasTrans: limitValues['fat-trans-slider']
-                ? limitValues['fat-trans-slider'][1]
+                ? limitValues['fat-trans-slider'][1] / 100
                 : 0,
             limiteMedioGordurasSaturadas: limitValues['fat-saturated-slider']
-                ? limitValues['fat-saturated-slider'][0]
+                ? limitValues['fat-saturated-slider'][0] / 100
                 : 0,
             limiteAltoGordurasSaturadas: limitValues['fat-saturated-slider']
-                ? limitValues['fat-saturated-slider'][1]
+                ? limitValues['fat-saturated-slider'][1] / 100
                 : 0,
-            limiteMedioSodio: limitValues['sodium-slider'][0],
-            limiteAltoSodio: limitValues['sodium-slider'][1],
+            limiteMedioSodio: limitValues['sodium-slider'][0] / 100,
+            limiteAltoSodio: limitValues['sodium-slider'][1] / 100,
             componentesAlergenicos:
                 selectedComponents.length > 0
                     ? selectedComponents.map((c) => ({
@@ -68,7 +82,10 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                     : undefined,
         };
         api.post('/perfil', submitData)
-            .then(() => navigation.navigate('ReadProductNav'))
+            .then(() => {
+                ShowToast('Perfil cadastrado!');
+                navigation.navigate('ReadProductNav');
+            })
             .catch((err) => {
                 if (err.response.status == 409) {
                     ShowToast(
@@ -88,7 +105,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
     const handleButtonConfirmation = () => {
         ConfirmDialog(
             'Confirmar decisão?',
-            'Os valores podem ser alterados a qualquer momento.',
+            'Seu perfil pode ser alterado a qualquer momento.',
             () => handleSubmit(),
             () => {}
         );

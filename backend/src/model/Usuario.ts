@@ -18,8 +18,12 @@ export enum NivelUsuario {
 
 @Entity({ name: 'usuario' })
 export class Usuario {
+    constructor(nome?: string) {
+        this.nome = nome;
+    }
+
     @BeforeInsert()
-    async hashPassword() : Promise<void> {
+    async hashPassword(): Promise<void> {
         this.senha = await hash(this.senha, 10);
     }
 
@@ -53,11 +57,11 @@ export class Usuario {
     @Column({
         type: 'bool',
         name: 'ativo',
-        nullable : false,
-        default : true,
+        nullable: false,
+        default: true,
         select: false,
     })
-    ativo : boolean;
+    ativo: boolean;
 
     @Column({
         type: 'enum',
@@ -66,7 +70,7 @@ export class Usuario {
     })
     nivel: NivelUsuario;
 
-    @OneToOne(() => Perfil)
+    @OneToOne(() => Perfil, (perfil) => perfil.usuario)
     @JoinColumn({ name: 'id_perfil' })
     perfil: Perfil;
 }

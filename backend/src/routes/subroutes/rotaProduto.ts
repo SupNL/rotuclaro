@@ -46,7 +46,7 @@ rotaProduto.get(
     celebrate({
         [Segments.HEADERS]: Joi.object()
             .keys({
-                imei: Joi.string().required().min(1),
+                idunico: Joi.string().required().min(1),
             })
             .unknown(),
     }),

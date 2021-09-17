@@ -26,16 +26,17 @@ const DefineBaseValue = ({ navigation }) => {
 
     return (
         <View style={sharedStyles.defaultScreen}>
-            <Header>Defina o valor base</Header>
+            <Header>Definir valor de referência</Header>
             <CustomText style={styles.text}>
-                Defina um valor base para ser utilizado como referência na hora
-                de te alertar. Todos os alimentos terão esse mesmo valor de
-                porção.
+                É o valor de referência para ser utilizado na hora de te
+                alertar. Esse é o valor que será apresentado como porção em
+                todos alimentos que você ver.
             </CustomText>
             <CustomText style={styles.text}>
                 Os componentes alimentares (açúcares, gorduras, etc) serão
-                calculados em cima desse valor (por exemplo, 5g de açúcar em
-                100g é equivalente a 2.5g de açúcar em uma porção de 50g).
+                baseados em cima desse valor (por exemplo, 5g de açúcar em uma
+                porção de 100g, que é o equivalente a 2.5g de açúcar em uma
+                porção de 50g).
             </CustomText>
             <Form
                 ref={formRef}
@@ -44,8 +45,8 @@ const DefineBaseValue = ({ navigation }) => {
             >
                 <Input
                     name='base-value'
-                    label='Valor base'
-                    placeholder='Valor base em gramas'
+                    label='Valor de referência em gramas'
+                    placeholder='Exemplo: 100 g'
                     type='number'
                     suffix='g'
                     style={{

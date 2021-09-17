@@ -10,7 +10,7 @@ export const handleQueryFailedError = (error : Error, _: Request, res: Response)
             
             const matchKey = detail.match(/.* \((?<key>\w+)\).*/);
     
-            res.statusCode = 400;
+            res.statusCode = 409;
             return res.json({ message: `${matchKey.groups.key} já está em uso` });
         }
 

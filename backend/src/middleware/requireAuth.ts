@@ -26,6 +26,6 @@ export function requireAuth(
         req.usuario = { id, nivel };
         return next();
     } catch (err) {
-        return res.status(403).json({ message: 'Token inválido' });
+        return res.status(401).json({ message: 'Token inválido' });
     }
 }

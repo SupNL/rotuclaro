@@ -4,13 +4,23 @@ import {
     createDrawerNavigator,
     DrawerContentScrollView,
     DrawerItemList,
+    DrawerItem,
 } from '@react-navigation/drawer';
 
 import ReadProductNav from './ReadProductNav';
 import CreateProfileNavigation from './CreateProfileNavigation';
+import { useAuth } from 'hooks/useAuth';
+import ShowToast from 'utils/ShowToast';
 
 const UserNavigation = () => {
     const UserDrawer = createDrawerNavigator();
+    const { profile, signOut } = useAuth();
+    
+    let initialRoute = 'CreateProfileNav';
+
+    if(profile) {
+        initialRoute = 'ReadProductNav';
+    }
 
     const renderDrawerContent = (props) => {
         const { state, ...rest } = props;
@@ -21,13 +31,20 @@ const UserNavigation = () => {
         return (
             <DrawerContentScrollView {...props}>
                 <DrawerItemList state={newState} {...rest} />
+                <DrawerItem
+                    label='Sair'
+                    onPress={() => {
+                        ShowToast('Desautenticado.');
+                        signOut();
+                    }}
+                />
             </DrawerContentScrollView>
         );
     };
 
     return (
         <UserDrawer.Navigator
-            initialRouteName='CreateProfileNav'
+            initialRouteName={initialRoute}
             drawerContent={renderDrawerContent}
             detachInactiveScreens={true}
         >
@@ -40,7 +57,7 @@ const UserNavigation = () => {
             <UserDrawer.Screen
                 name='ReadProductNav'
                 component={ReadProductNav}
-                options={{ title : 'Ler produto' }}
+                options={{ title: 'Ler produto' }}
             />
         </UserDrawer.Navigator>
     );

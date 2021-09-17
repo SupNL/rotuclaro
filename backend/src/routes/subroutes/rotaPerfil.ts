@@ -2,8 +2,10 @@ import { celebrate, Joi, Segments } from 'celebrate';
 import { NextFunction, Request, Response, Router } from 'express';
 import { FindManyOptions } from 'typeorm';
 import ControlePerfil from '../../controller/ControlePerfil';
+import ControleUsuario from '../../controller/ControleUsuario';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { requireAuth } from '../../middleware/requireAuth';
+import { Perfil } from '../../model/Perfil';
 import { NivelUsuario, Usuario } from '../../model/Usuario';
 import { handleQueryFailedError } from '../../utils/errorHandler';
 
@@ -138,6 +140,12 @@ rotaPerfil.post(
             instance.usuario = new Usuario();
             instance.usuario.id = req.usuario.id;
             const perfil = await ControlePerfil.create(instance);
+
+            instance.usuario.perfil = new Perfil();
+            instance.usuario.perfil.id = perfil.id;
+            await ControleUsuario.create(instance.usuario);
+
+            delete perfil.usuario;
 
             return res.status(201).json(perfil);
         } catch (err) {

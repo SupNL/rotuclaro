@@ -21,6 +21,8 @@
     "axios": "^0.21.4",
     "expo": "~41.0.1",
     "expo-barcode-scanner": "~10.1.2",
+    "expo-device": "~3.2.0",
+    "expo-secure-store": "~10.1.0",
     "expo-status-bar": "~1.0.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

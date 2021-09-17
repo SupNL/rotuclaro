@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ComponenteAlergenico } from './ComponenteAlergenico';
 import { Usuario } from './Usuario';
 
@@ -14,7 +22,6 @@ export class Perfil {
     })
     gramas: number;
 
-
     @Column({
         type: 'real',
         name: 'limite_medio_kcal',
@@ -28,7 +35,6 @@ export class Perfil {
         nullable: false,
     })
     limiteAltoKcal: number;
-
 
     @Column({
         type: 'real',
@@ -44,7 +50,6 @@ export class Perfil {
     })
     limiteAltoCarboidratos: number;
 
-
     @Column({
         type: 'real',
         name: 'limite_medio_acucares',
@@ -58,7 +63,6 @@ export class Perfil {
         nullable: false,
     })
     limiteAltoAcucares: number;
-
 
     @Column({
         type: 'real',
@@ -74,7 +78,6 @@ export class Perfil {
     })
     limiteAltoGordurasTotais: number;
 
-
     @Column({
         type: 'real',
         name: 'limite_medio_gorduras_trans',
@@ -88,7 +91,6 @@ export class Perfil {
         nullable: false,
     })
     limiteAltoGordurasTrans: number;
-
 
     @Column({
         type: 'real',
@@ -104,7 +106,6 @@ export class Perfil {
     })
     limiteAltoGordurasSaturadas: number;
 
-
     @Column({
         type: 'real',
         name: 'limite_medio_sodio',
@@ -119,22 +120,23 @@ export class Perfil {
     })
     limiteAltoSodio: number;
 
-
     @ManyToMany(() => ComponenteAlergenico)
     @JoinTable({
         name: 'componentes_perfis',
         joinColumn: {
             name: 'id_perfil',
-            referencedColumnName: 'id'
+            referencedColumnName: 'id',
         },
         inverseJoinColumn: {
             name: 'id_componente',
             referencedColumnName: 'id',
-        }
+        },
     })
-    componentesAlergenicos : ComponenteAlergenico[]
+    componentesAlergenicos: ComponenteAlergenico[];
 
-    @OneToOne(() => Usuario, { nullable: false })
+    @OneToOne(() => Usuario, (usuario) => usuario.perfil, {
+        nullable: false,
+    })
     @JoinColumn({ name: 'id_usuario' })
     usuario: Usuario;
 }

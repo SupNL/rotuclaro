@@ -9,6 +9,7 @@ import AdminNavigation from './AdminNavigation';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { View } from 'react-native';
+import api from 'services/api';
 
 const Navigator = () => {
     const { user } = useAuth();
@@ -19,10 +20,16 @@ const Navigator = () => {
         if (!user) return;
         if (user.unauthenticated) {
             setInitialRoute('LoginNav');
-        } else if (user.nivel == 0) {
-            setInitialRoute('AdminNav');
         } else {
-            setInitialRoute('UserNav');
+            api.get('/sessao').then(() => {
+                if (user.nivel == 0) {
+                    setInitialRoute('AdminNav');
+                } else {
+                    setInitialRoute('UserNav');
+                }
+            }).catch(() => {
+                setInitialRoute('LoginNav');
+            });
         }
     }, [user]);
 
@@ -31,6 +38,7 @@ const Navigator = () => {
             initialRouteName={initialRoute}
             screenOptions={{
                 headerShown: false,
+                
             }}
         >
             <Stack.Screen name='LoginNav' component={LoginNavigation} />
@@ -46,7 +54,7 @@ const MainNavigation = ({ children }) => {
     const navRef = useRef();
 
     return (
-        <NavigationContainer ref={navRef}>
+        <NavigationContainer  ref={navRef}>
             <AuthProvider navRef={navRef}>
                 <Navigator />
                 {children}

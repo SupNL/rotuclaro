@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Text, View, Dimensions } from 'react-native';
+import { Text, View, Dimensions, StyleSheet } from 'react-native';
 import { useField } from '@unform/core';
 import { useState } from 'react';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import COLORS from 'shared/COLORS';
 
 function CustomSlider({
     name,
@@ -23,12 +24,8 @@ function CustomSlider({
     const [rightValue, setRightValue] = useState(defaultValue ? defaultValue[1] : maxValue ? maxValue : 1000);
 
     useEffect(() => {
-        sliderRef.current.value = defaultValue;
-    }, [defaultValue]);
-
-    useEffect(() => {
         if (sliderRef.current) sliderRef.current.value = defaultValue;
-    }, [defaultValue]);
+    }, []);
 
     useEffect(() => {
         registerField({
@@ -59,13 +56,33 @@ function CustomSlider({
         [onChangeText]
     );
 
+    const CustomMarker = ({ color }) => {
+        return (
+            <View style={{...styles.marker, backgroundColor : color}}></View>
+        );
+    };
+
     return (
         <View>
             {label && <Text style={{ fontWeight: 'bold' }}>{label}</Text>}
-            {labelLeft && <Text>{labelLeft + leftValue / 100}{suffix}</Text>}
-            {labelRight && <Text>{labelRight + rightValue / 100}{suffix}</Text>}
+            {labelLeft && <Text style={styles.warningText}>{labelLeft + leftValue / 100}{suffix}</Text>}
+            {labelRight && <Text style={styles.dangerText}>{labelRight + rightValue / 100}{suffix}</Text>}
             <MultiSlider
+                isMarkersSeparated={true}
+                selectedStyle={{
+                    backgroundColor: COLORS.black
+                }}
+                unselectedStyle={{
+                    backgroundColor: COLORS.grey
+                }}
+                customMarkerLeft={(e) => {
+                    return <CustomMarker currentValue={e.currentValue} color={COLORS.warning} />;
+                }}
+                customMarkerRight={(e) => {
+                    return <CustomMarker currentValue={e.currentValue} color={COLORS.error} />;
+                }}
                 step={10}
+                snapped={true}
                 sliderLength={deviceWidth * 0.8}
                 values={[leftValue , rightValue]}
                 min={minValue ? minValue : 0}
@@ -80,5 +97,28 @@ function CustomSlider({
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    marker : {
+        borderRadius: 100,
+        width: 18,
+        height: 18,
+    },
+
+    warningText : {
+        backgroundColor: COLORS.warningLight,
+        fontWeight: 'bold',
+        padding: 4,
+        borderTopLeftRadius : 8,
+        borderTopRightRadius : 8,
+    },
+    dangerText : {
+        backgroundColor: COLORS.errorLight,
+        fontWeight: 'bold',
+        padding: 4,
+        borderBottomLeftRadius : 8,
+        borderBottomRightRadius : 8,
+    }
+});
 
 export default CustomSlider;

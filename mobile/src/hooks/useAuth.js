@@ -15,8 +15,13 @@ const AuthContext = createContext({});
 const AuthProvider = ({ children, navRef }) => {
     const tokenAddr = '@rotuclaro:token';
     const userAddr = '@rotuclaro:user';
+    const profileAddr = '@rotuclaro:profile';
 
-    const [data, setData] = useState({ user: null, token: null });
+    const [data, setData] = useState({
+        user: null,
+        token: null,
+        profile: null,
+    });
 
     const navReplace = (name) => {
         navRef.current.dispatch(StackActions.replace(name));
@@ -27,9 +32,11 @@ const AuthProvider = ({ children, navRef }) => {
             console.log('[AuthHook] Initializing on useEffect');
             const token = await AsyncStorage.getItem(tokenAddr);
             const user = await AsyncStorage.getItem(userAddr);
+            const profile = await AsyncStorage.getItem(profileAddr);
 
             if (token && user) {
                 const parsedUser = JSON.parse(user);
+                const parsedProfile = JSON.parse(profile);
                 console.log(
                     `[AuthHook] User ${parsedUser.nome} is authenticated`
                 );
@@ -38,6 +45,7 @@ const AuthProvider = ({ children, navRef }) => {
                 setData({
                     token,
                     user: parsedUser,
+                    profile: parsedProfile,
                 });
             } else {
                 setData({
@@ -45,6 +53,7 @@ const AuthProvider = ({ children, navRef }) => {
                         unauthenticated: true,
                     },
                     token: null,
+                    profile: null,
                 });
             }
         }
@@ -57,7 +66,6 @@ const AuthProvider = ({ children, navRef }) => {
         if (data.token) {
             api.get('/sessao').catch(() => {
                 console.log('[AuthHook] Session expired');
-                navReplace('LoginNav');
                 signOut();
             });
         }
@@ -73,31 +81,46 @@ const AuthProvider = ({ children, navRef }) => {
 
         const { token, usuario } = res.data;
 
+        const perfil = usuario.perfil;
+        delete usuario.perifl;
+
         await AsyncStorage.setItem(tokenAddr, token);
         await AsyncStorage.setItem(userAddr, JSON.stringify(usuario));
+        await AsyncStorage.setItem(profileAddr, JSON.stringify(perfil));
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
-        setData({ token, user: usuario });
-        return { token, usuario };
+        setData({ token, user: usuario, profile: perfil });
+        return { token, usuario, perfil };
     }, []);
 
     const signOut = useCallback(async () => {
         console.log('[AuthHook] Signing out');
 
-        await AsyncStorage.removeItem('@rotuclaro:token');
-        await AsyncStorage.removeItem('@rotuclaro:user');
+        await AsyncStorage.removeItem(tokenAddr);
+        await AsyncStorage.removeItem(userAddr);
+        await AsyncStorage.removeItem(profileAddr);
         api.defaults.headers.authorization = null;
         setData({
             user: {
                 unauthenticated: true,
             },
             token: null,
+            profile: null,
         });
+
+        if (navRef.current) navReplace('LoginNav');
     }, []);
 
+    const updateProfile = useCallback(async (profile) => {
+        await AsyncStorage.setItem(profileAddr, JSON.stringify(profile));
+        setData((old) => ({ ...old, profile: profile }));
+    });
+
     return (
-        <AuthContext.Provider value={{ signIn, signOut, user: data.user }}>
+        <AuthContext.Provider
+            value={{ signIn, signOut, updateProfile, user: data.user, profile: data.profile }}
+        >
             {children}
         </AuthContext.Provider>
     );

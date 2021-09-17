@@ -77,6 +77,7 @@ rotaUsuario.get('/:id', requireAuth, validateUser, async (req, res) => {
             where: {
                 ativo: true,
             },
+            relations: ['perfil'],
         });
 
         if (usuario) return res.status(200).json(usuario);
@@ -92,12 +93,12 @@ rotaUsuario.post(
     celebrate({
         [Segments.HEADERS]: Joi.object()
             .keys({
-                imei: Joi.string().required().min(1),
+                idunico: Joi.string().required().min(1),
             })
             .unknown(),
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().required().min(1),
-            login: Joi.string().required().min(1),
+            login: Joi.string().required().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
             senha: Joi.string().required().min(1),
         }),
     }),
@@ -122,18 +123,21 @@ rotaUsuario.put(
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().optional().min(1),
-            login: Joi.string().optional().min(1),
+            login: Joi.string().optional().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
             senha: Joi.string().optional().min(1),
         }),
     }),
     async (req, res) => {
         try {
             const { id } = req.params;
-            const usuarioToChange = await ControleUsuario.findOne(parseInt(id), {
-                where : {
-                    ativo : true,
+            const usuarioToChange = await ControleUsuario.findOne(
+                parseInt(id),
+                {
+                    where: {
+                        ativo: true,
+                    },
                 }
-            });
+            );
 
             if (usuarioToChange == null)
                 return res.status(404).json({ message: 'Não encontrado' });
