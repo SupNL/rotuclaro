@@ -12,17 +12,17 @@ import { View } from 'react-native';
 import api from 'services/api';
 
 const Navigator = () => {
-    const { user } = useAuth();
+    const { usuario } = useAuth();
     const Stack = createStackNavigator();
     const [initialRoute, setInitialRoute] = useState(null);
     
     useEffect(() => {
-        if (!user) return;
-        if (user.unauthenticated) {
+        if (!usuario) return;
+        if (usuario.unauthenticated) {
             setInitialRoute('LoginNav');
         } else {
             api.get('/sessao').then(() => {
-                if (user.nivel == 0) {
+                if (usuario.nivel == 0) {
                     setInitialRoute('AdminNav');
                 } else {
                     setInitialRoute('UserNav');
@@ -31,7 +31,7 @@ const Navigator = () => {
                 setInitialRoute('LoginNav');
             });
         }
-    }, [user]);
+    }, [usuario]);
 
     if (initialRoute != null) {
         return <Stack.Navigator

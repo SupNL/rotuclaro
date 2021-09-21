@@ -14,11 +14,11 @@ import ShowToast from 'utils/ShowToast';
 
 const UserNavigation = () => {
     const UserDrawer = createDrawerNavigator();
-    const { profile, signOut } = useAuth();
-    
+    const { perfil, signOut } = useAuth();
+
     let initialRoute = 'CreateProfileNav';
 
-    if(profile) {
+    if (perfil) {
         initialRoute = 'ReadProductNav';
     }
 

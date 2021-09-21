@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from 'services/api';
 import { StackActions } from '@react-navigation/native';
+import { Perfil } from 'model/Perfil';
 
 const AuthContext = createContext({});
 
@@ -18,9 +19,9 @@ const AuthProvider = ({ children, navRef }) => {
     const profileAddr = '@rotuclaro:profile';
 
     const [data, setData] = useState({
-        user: null,
         token: null,
-        profile: null,
+        usuario: null,
+        perfil: null,
     });
 
     const navReplace = (name) => {
@@ -44,16 +45,18 @@ const AuthProvider = ({ children, navRef }) => {
 
                 setData({
                     token,
-                    user: parsedUser,
-                    profile: parsedProfile,
+                    usuario: parsedUser,
+                    perfil: parsedProfile
+                        ? new Perfil(parsedProfile)
+                        : parsedProfile,
                 });
             } else {
                 setData({
-                    user: {
+                    token: null,
+                    usuario: {
                         unauthenticated: true,
                     },
-                    token: null,
-                    profile: null,
+                    perfil: null,
                 });
             }
         }
@@ -61,9 +64,8 @@ const AuthProvider = ({ children, navRef }) => {
     }, []);
 
     useEffect(() => {
-        console.log('[AuthHook] Checking Session');
-
         if (data.token) {
+            console.log('[AuthHook] Checking Session with available token');
             api.get('/sessao').catch(() => {
                 console.log('[AuthHook] Session expired');
                 signOut();
@@ -82,7 +84,7 @@ const AuthProvider = ({ children, navRef }) => {
         const { token, usuario } = res.data;
 
         const perfil = usuario.perfil;
-        delete usuario.perifl;
+        delete usuario.perfil;
 
         await AsyncStorage.setItem(tokenAddr, token);
         await AsyncStorage.setItem(userAddr, JSON.stringify(usuario));
@@ -90,8 +92,11 @@ const AuthProvider = ({ children, navRef }) => {
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
-        setData({ token, user: usuario, profile: perfil });
-        return { token, usuario, perfil };
+        const perfilInstanciado = perfil ? new Perfil(perfil) : undefined;
+
+        const objectRes = { token, usuario, perfil: perfilInstanciado };
+        setData({ token, usuario, perfil: perfilInstanciado });
+        return objectRes;
     }, []);
 
     const signOut = useCallback(async () => {
@@ -102,11 +107,11 @@ const AuthProvider = ({ children, navRef }) => {
         await AsyncStorage.removeItem(profileAddr);
         api.defaults.headers.authorization = null;
         setData({
-            user: {
+            token: null,
+            usuario: {
                 unauthenticated: true,
             },
-            token: null,
-            profile: null,
+            perfil: null,
         });
 
         if (navRef.current) navReplace('LoginNav');
@@ -114,12 +119,18 @@ const AuthProvider = ({ children, navRef }) => {
 
     const updateProfile = useCallback(async (profile) => {
         await AsyncStorage.setItem(profileAddr, JSON.stringify(profile));
-        setData((old) => ({ ...old, profile: profile }));
+        setData((old) => ({ ...old, perfil: new Perfil(profile) }));
     });
 
     return (
         <AuthContext.Provider
-            value={{ signIn, signOut, updateProfile, user: data.user, profile: data.profile }}
+            value={{
+                signIn,
+                signOut,
+                updateProfile,
+                usuario: data.usuario,
+                perfil: data.perfil,
+            }}
         >
             {children}
         </AuthContext.Provider>

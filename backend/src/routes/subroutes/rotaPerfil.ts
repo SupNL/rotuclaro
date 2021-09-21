@@ -1,49 +1,21 @@
 import { celebrate, Joi, Segments } from 'celebrate';
-import { NextFunction, Request, Response, Router } from 'express';
+import { Router } from 'express';
 import { FindManyOptions } from 'typeorm';
 import ControlePerfil from '../../controller/ControlePerfil';
 import ControleUsuario from '../../controller/ControleUsuario';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { requireAuth } from '../../middleware/requireAuth';
 import { Perfil } from '../../model/Perfil';
-import { NivelUsuario, Usuario } from '../../model/Usuario';
+import { Usuario } from '../../model/Usuario';
 import { handleQueryFailedError } from '../../utils/errorHandler';
 
 const rotaPerfil = Router();
 
-const validateUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const { id } = req.params;
-        if (isNaN(parseInt(id))) {
-            return res.status(404).json({ message: 'Não encontrado' });
-        }
-
-        const perfil = await ControlePerfil.findOne(parseInt(id), {
-            relations: ['usuario'],
-        });
-
-        if (perfil) {
-            if (
-                req.usuario.nivel == NivelUsuario.ADMIN ||
-                perfil.usuario.id == req.usuario.id
-            )
-                return next();
-            return res.status(404).json({ message: 'Não encontrado' });
-        }
-        return res.status(404).json({ message: 'Não encontrado' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Erro de servidor' });
-    }
-};
-
 rotaPerfil.get('/', requireAuth, expectAdmin, async (req, res) => {
     try {
-        const options: FindManyOptions = {};
+        const options: FindManyOptions<Perfil> = {};
+
+        options.relations = ['componentesAlergenicos'];
 
         if (
             typeof req.query.limit == 'string' &&
@@ -74,11 +46,24 @@ rotaPerfil.get('/', requireAuth, expectAdmin, async (req, res) => {
     }
 });
 
-rotaPerfil.get('/:id', requireAuth, validateUser, async (req, res) => {
+rotaPerfil.get('/meu_perfil', requireAuth, async (req, res) => {
     try {
-        const { id } = req.params;
+        const checkPerfil = await ControlePerfil.findMany({
+            where: {
+                usuario: {
+                    id: req.usuario.id,
+                },
+            },
+            relations : ['componentesAlergenicos']
+        });
 
-        const perfil = await ControlePerfil.findOne(parseInt(id));
+        if (checkPerfil.length == 0) {
+            return res
+                .status(404)
+                .json({ message: 'Não encontrado' });
+        }
+
+        const perfil = checkPerfil[0];
 
         if (perfil) {
             return res.status(200).json(perfil);
@@ -155,9 +140,8 @@ rotaPerfil.post(
 );
 
 rotaPerfil.put(
-    '/:id',
+    '/',
     requireAuth,
-    validateUser,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             gramas: Joi.number().optional().greater(0),
@@ -186,16 +170,25 @@ rotaPerfil.put(
     }),
     async (req, res) => {
         try {
-            const { id } = req.params;
+            const checkPerfil = await ControlePerfil.findMany({
+                where: {
+                    usuario: {
+                        id: req.usuario.id,
+                    },
+                },
+            });
 
-            const perfilToChange = await ControlePerfil.findOne(parseInt(id));
+            if (checkPerfil.length == 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'Perfil não encontrado para alterar' });
+            }
 
-            if (perfilToChange == null)
-                return res.status(404).json({ message: 'Não encontrado' });
+            const perfilId = checkPerfil[0].id;
 
             const receivedBody = ControlePerfil.convertBody(req.body);
             const perfil = await ControlePerfil.edit(
-                parseInt(id),
+                perfilId,
                 receivedBody
             );
 

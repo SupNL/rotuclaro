@@ -52,7 +52,6 @@ const CreateAccount = ({ navigation }) => {
                 api.post('/usuario', submit_data, {
                     headers: {
                         idUnico: id,
-                        Authorization: 'testgsnfjinasidjasn',
                     },
                 })
                     .then(() => {
@@ -67,6 +66,7 @@ const CreateAccount = ({ navigation }) => {
                             });
                     })
                     .catch((err) => {
+                        console.log(err);
                         if (err.response.status == 429) {
                             ShowToast(
                                 'Muitas requisições feitas. Aguarde antes de poder criar a conta.'

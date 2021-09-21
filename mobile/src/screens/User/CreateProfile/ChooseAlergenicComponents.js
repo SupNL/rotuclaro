@@ -17,7 +17,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
     const [selectedComponents, setSelectedComponents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { signOut } = useAuth();
+    const { signOut, updateProfile } = useAuth();
 
     const routeParams = route.params;
 
@@ -82,9 +82,11 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                     : undefined,
         };
         api.post('/perfil', submitData)
-            .then(() => {
+            .then((res) => {
                 ShowToast('Perfil cadastrado!');
-                navigation.navigate('ReadProductNav');
+                updateProfile(res.data).then(() =>
+                    navigation.navigate('ReadProductNav')
+                );
             })
             .catch((err) => {
                 if (err.response.status == 409) {
