@@ -1,13 +1,18 @@
 import React from 'react';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
-import MainScreenNavigation from './MainScreenNavigation';
+import {
+    createDrawerNavigator,
+    DrawerContentScrollView,
+    DrawerItem,
+    DrawerItemList,
+} from '@react-navigation/drawer';
+import ReportScreenNavigation from './ReportScreenNavigation';
+import AlergenicComponentNavigation from './AlergenicComponentNavigation';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
-import AlergenicComponentNavigation from './AlergenicComponentNavigation';
 
-const AdminNavigation = () => {
+const AdminNavigation = ({ renderMenuButton }) => {
     const AdminDrawer = createDrawerNavigator();
-    const { signOut} = useAuth();
+    const { signOut } = useAuth();
 
     const renderDrawerContent = (props) => {
         return (
@@ -28,17 +33,20 @@ const AdminNavigation = () => {
         <AdminDrawer.Navigator
             initialRouteName='MainScreen'
             drawerContent={renderDrawerContent}
+            drawerPosition='right'
             detachInactiveScreens={true}
         >
             <AdminDrawer.Screen
                 name='MainScreenNav'
-                component={MainScreenNavigation}
-                options={{ title: 'Tela principal' }}
+                component={ReportScreenNavigation}
+                options={{ title: 'Relatórios' }}
+                renderMenuButton={renderMenuButton}
             />
             <AdminDrawer.Screen
                 name='AlergenicComponentScreenNav'
                 component={AlergenicComponentNavigation}
                 options={{ title: 'Componentes alergênicos' }}
+                renderMenuButton={renderMenuButton}
             />
         </AdminDrawer.Navigator>
     );

@@ -6,7 +6,6 @@ import Input from 'components/Input';
 import CustomButton from 'components/CustomButton';
 import sharedStyles from 'shared/sharedStyles';
 import { useAuth } from 'hooks/useAuth';
-import ShowToast from 'utils/ShowToast';
 
 const Login = ({ navigation }) => {
     const formRef = useRef(null);
@@ -15,10 +14,10 @@ const Login = ({ navigation }) => {
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
         const errorList = {};
-        if (data.username == null) {
+        if (data.username == null || data.username == '') {
             errorList.username = 'Nome de usuário obrigatório';
         }
-        if (data.password == null) {
+        if (data.password == null || data.password == '') {
             errorList.password = 'Senha obrigatória';
         }
         if (Object.keys(errorList).length) {
@@ -33,13 +32,14 @@ const Login = ({ navigation }) => {
                     }
                 })
                 .catch((err) => {
-                    if (err.response && err.response.status == 401) {
-                        ShowToast(err.response.data.message);
-                    } else {
-                        ShowToast(
-                            'Ocorreu um erro inesperado. Tente novamente mais tarde.'
-                        );
+                    if (err.response) {
+                        if (err.response.status == 401) {
+                            formRef.current.setErrors({
+                                password: 'Credenciais incorretos',
+                            });
+                        }
                     }
+                    console.error({ err });
                 });
         }
     };

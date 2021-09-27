@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     modalScreen: {
         width: '90%',
         height: 'auto',
+        maxHeight: '100%',
         padding: 16,
         alignSelf: 'center',
         backgroundColor: 'white',

@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, MoreThan } from 'typeorm';
 import ControleComponenteAlergenico from '../../controller/ControleComponenteAlergenico';
 import { expectAdmin } from '../../middleware/expectAdmin';
 
@@ -8,7 +8,11 @@ const rotaComponente = Router();
 
 rotaComponente.get('/', async (req, res) => {
     try {
-        const options: FindManyOptions = {};
+        const options: FindManyOptions = {
+            order : {
+                nome : 'ASC'
+            }
+        };
 
         if (
             typeof req.query.limit == 'string' &&
@@ -21,19 +25,29 @@ rotaComponente.get('/', async (req, res) => {
         }
 
         if (
-            typeof req.query.page == 'string' &&
-            !isNaN(parseInt(req.query.page)) &&
-            parseInt(req.query.page) > 0
+            typeof req.query['last_name'] == 'string'
         ) {
-            options.skip = (Number(req.query.page) - 1) * options.take;
-        } else {
-            options.skip = 0;
+            options.where = {
+                nome : MoreThan(req.query['last_name'])
+            };
         }
 
-        const componenteAlergenico =
+        const [componentes, totalCount] =
             await ControleComponenteAlergenico.findMany(options);
 
-        return res.status(200).json(componenteAlergenico);
+        res.set('x-total-count', totalCount.toString());
+
+        const mappedComponentes = componentes.map(async c => {
+            const isAssociated = await ControleComponenteAlergenico.isAssociatedWithProfile(c);
+            if (isAssociated)
+                return {...c, permiteExclusao: false };
+            return {...c, permiteExclusao: true };
+        });
+
+        Promise.all(mappedComponentes).then(componentes => {
+            return res.status(200).json(componentes);
+        });
+        
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: 'Erro de servidor' });

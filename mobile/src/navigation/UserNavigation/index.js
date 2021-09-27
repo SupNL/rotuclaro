@@ -46,6 +46,7 @@ const UserNavigation = () => {
         <UserDrawer.Navigator
             initialRouteName={initialRoute}
             drawerContent={renderDrawerContent}
+            drawerPosition="right"
             detachInactiveScreens={true}
         >
             <UserDrawer.Screen

@@ -1,26 +1,46 @@
-import { DeleteResult, FindManyOptions, FindOneOptions, getConnection } from 'typeorm';
+import {
+    DeleteResult,
+    FindManyOptions,
+    FindOneOptions,
+    getConnection,
+} from 'typeorm';
 import { ComponenteAlergenico } from '../model/ComponenteAlergenico';
 
 export default {
     convertBody(
-        entityBody : Partial<ComponenteAlergenico>
-    ) : ComponenteAlergenico {
+        entityBody: Partial<ComponenteAlergenico>
+    ): ComponenteAlergenico {
         const connection = getConnection();
         const repo = connection.getRepository(ComponenteAlergenico);
         const componenteAlergenico = repo.create(entityBody);
         return componenteAlergenico;
     },
 
-    findMany(
-        findOptions?: FindManyOptions
-    ): Promise<ComponenteAlergenico[]> {
+    isAssociatedWithProfile(comp: ComponenteAlergenico): Promise<boolean> {
+        return new Promise((resolve) => {
+            const connection = getConnection();
+            const query = connection
+                .getRepository(ComponenteAlergenico)
+                .createQueryBuilder('ca')
+                .innerJoin('componentes_perfis', 'cp', 'ca.id = cp.id_componente')
+                .where('ca.id = :cId', { cId : comp.id });
+
+            query.getCount().then(count => {
+                count > 0 ? resolve(true) : resolve(false);
+            });
+        });
+    },
+
+    findMany(findOptions?: FindManyOptions): Promise<[ComponenteAlergenico[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(ComponenteAlergenico);
 
-            repo.find(findOptions)
-                .then((componentes) => resolve(componentes))
-                .catch((err) => reject(err));
+            repo.count().then(totalCount => {
+                repo.find(findOptions)
+                    .then((componentes) => resolve([componentes, totalCount]))
+                    .catch((err) => reject(err));
+            });
         });
     },
 

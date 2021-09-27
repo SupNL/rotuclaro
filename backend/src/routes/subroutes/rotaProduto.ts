@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, MoreThan } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { produtoLimiter } from '../../middleware/limitRequests';
@@ -23,13 +23,11 @@ rotaProduto.get('/', expectAdmin, async (req, res) => {
         }
 
         if (
-            typeof req.query.page == 'string' &&
-            !isNaN(parseInt(req.query.page)) &&
-            parseInt(req.query.page) > 0
+            typeof req.query['last_name'] == 'string'
         ) {
-            options.skip = (Number(req.query.page) - 1) * options.take;
-        } else {
-            options.skip = 0;
+            options.where = {
+                nome : MoreThan(req.query['last_name'])
+            };
         }
 
         const produtos = await ControleProduto.findMany(options);

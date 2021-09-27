@@ -6,7 +6,16 @@ import { Produto } from '../../model/Produto';
 
 const listaComponentes = [
     new ComponenteAlergenico('Soja'),
-    new ComponenteAlergenico('Lactose'),
+    new ComponenteAlergenico('Lactose (Leite)'),
+    new ComponenteAlergenico('Amendoins'),
+    new ComponenteAlergenico('Nozes'),
+    new ComponenteAlergenico('Glúten'),
+    new ComponenteAlergenico('Albumina (Ovo)'),
+    new ComponenteAlergenico('Peixes'),
+    new ComponenteAlergenico('Frutos do mar'),
+    new ComponenteAlergenico('Camarão'),
+    new ComponenteAlergenico('Soja transgênica'),
+    new ComponenteAlergenico('Trigo'),
 ];
 
 const listaProdutos = [

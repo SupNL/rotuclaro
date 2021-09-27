@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from 'components/Header';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, FlatList } from 'react-native';
 import axios from 'axios';
 
 import CustomText from 'components/CustomText';
@@ -11,40 +11,45 @@ import SelectableComponent from 'components/SelectableComponent';
 import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
+import COLORS from 'shared/COLORS';
+import { useRef } from 'react';
 
 const ChooseAlergenicComponents = ({ navigation, route }) => {
     const [components, setComponents] = useState([]);
     const [selectedComponents, setSelectedComponents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { signOut, updateProfile } = useAuth();
+    const source = axios.CancelToken.source();
+    const totalCount = useRef(-1);
+    const page = useRef(1);
+
+    const { updateProfile } = useAuth();
 
     const routeParams = route.params;
 
     const fetchComponents = (tokenSource) => {
-        api.get('/componente_alergenico', { cancelToken: tokenSource })
+        let url = '/componente_alergenico';
+        if(components.length > 0) {
+            const length = components.length;
+            const lastName = components[length - 1].nome;
+            url += `?last_name=${lastName}`;
+        }
+        api.get(url, {
+            cancelToken: tokenSource,
+        })
             .then((response) => {
                 const data = response.data;
-                const componentesFromApi = data.map((componente) => {
-                    return {
-                        id: componente.id,
-                        name: componente.nome,
-                    };
+                totalCount.current = response.headers['x-total-count'];
+                setComponents((old) => {
+                    const newArray = [...old, ...data];
+                    if (newArray.length == totalCount.current)
+                        setIsLoading(false);
+                    return newArray;
                 });
-                setComponents(componentesFromApi);
-                setIsLoading(false);
+                page.current += 1;
             })
             .catch((err) => {
-                if (err.response.status == 401) {
-                    ShowToast('Sessão expirada.');
-                    signOut();
-                } else if (err.response.status == 429) {
-                    ShowToast('Muitas requisições feitas, aguarde um pouco.');
-                } else {
-                    ShowToast(
-                        'Ocorreu um erro inesperado, tente novamente mais tarde.'
-                    );
-                }
+                console.log({ err });
             });
     };
 
@@ -89,18 +94,13 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                 );
             })
             .catch((err) => {
-                if (err.response.status == 409) {
-                    ShowToast(
-                        'Perfil já existente, não era para você estar naquela tela!'
-                    );
-                    navigation.navigate('ReadProductNav');
-                } else if (err.response.status == 429) {
-                    ShowToast('Muitas requisições feitas, aguarde um pouco.');
-                } else {
-                    ShowToast(
-                        'Ocorreu um erro inesperado, tente novamente mais tarde.'
-                    );
+                if (err.response) {
+                    if (err.response.status == 409) {
+                        ShowToast('Perfil já existente.');
+                        navigation.navigate('ReadProductNav');
+                    }
                 }
+                console.error({ err });
             });
     };
 
@@ -132,38 +132,21 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
         }
     };
 
-    const renderComponents = useCallback(() => {
-        if (components.length == 0) {
-            return (
-                <CustomText
-                    style={{
-                        marginBottom: 8,
-                        fontWeight: 'bold',
-                    }}
-                >
-                    No momento, não há nenhum componente alergênico cadastrado
-                    para seleção.
-                </CustomText>
-            );
-        }
-        const list = components.map((item) => {
-            return (
-                <SelectableComponent
-                    key={item.id}
-                    onPressAction={onComponentPress}
-                    componentId={item.id}
-                    componentName={item.name}
-                    isSelected={selectedComponents.find(
-                        (current) => current.id === item.id
-                    )}
-                />
-            );
-        });
-        return list;
-    }, [components, selectedComponents]);
+    const renderComponentItem = ({ item }) => {
+        return (
+            <SelectableComponent
+                key={item.id}
+                onPressAction={onComponentPress}
+                componentId={item.id}
+                componentName={item.nome}
+                isSelected={selectedComponents.find(
+                    (current) => current.id === item.id
+                )}
+            />
+        );
+    };
 
     useEffect(() => {
-        const source = axios.CancelToken.source();
         fetchComponents(source.token);
 
         return () => {
@@ -176,27 +159,45 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
     }, []);
 
     return (
-        <ScrollView>
-            <View style={sharedStyles.defaultScreen}>
-                <Header>Selecione os componentes alergênicos</Header>
-                <CustomText style={styles.text}>
-                    Caso você possua algum tipo de alergia, você precisa marcar
-                    os componentes abaixo que causam reações alérgicas.
-                </CustomText>
-                {isLoading ? (
-                    <View style={styles.text}>
-                        <CustomText>Carregando...</CustomText>
-                    </View>
-                ) : (
-                    <View>{renderComponents()}</View>
-                )}
+        <View style={sharedStyles.defaultScreen}>
+            <Header>Selecione os componentes alergênicos</Header>
+            <CustomText style={styles.text}>
+                Caso você possua algum tipo de alergia, você precisa marcar os
+                componentes abaixo que causam reações alérgicas.
+            </CustomText>
+            <CustomButton
+                title='Continuar'
+                onPress={handleButtonConfirmation}
+                style={{ marginBottom: 8 }}
+            />
+            <FlatList
+                data={components}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderComponentItem}
+                
+                ListFooterComponent={
+                    isLoading && <ActivityIndicator color={COLORS.secondary} />
+                }
+                onEndReachedThreshold={0.1}
+                onEndReached={() => {
+                    if (isLoading) fetchComponents(source.token);
+                }}
 
-                <CustomButton
-                    title='Continuar'
-                    onPress={handleButtonConfirmation}
-                />
-            </View>
-        </ScrollView>
+                ListEmptyComponent={
+                    !isLoading && (
+                        <CustomText
+                            style={{
+                                marginBottom: 8,
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            No momento, não há nenhum componente alergênico
+                            cadastrado para seleção.
+                        </CustomText>
+                    )
+                }
+            />
+        </View>
     );
 };
 

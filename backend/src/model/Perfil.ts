@@ -120,7 +120,7 @@ export class Perfil {
     })
     limiteAltoSodio: number;
 
-    @ManyToMany(() => ComponenteAlergenico)
+    @ManyToMany(() => ComponenteAlergenico, { eager : true })
     @JoinTable({
         name: 'componentes_perfis',
         joinColumn: {

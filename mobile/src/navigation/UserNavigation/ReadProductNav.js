@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import ReadProduct from 'screens/User/ReadProduct/ReadProduct';
 import BarCode from 'screens/User/ReadProduct/BarCode';
+import MenuHeaderButton from 'components/MenuHeaderButton';
 
 const ReadProductNav = () => {
     const ReadProductStack = createStackNavigator();
@@ -9,7 +10,10 @@ const ReadProductNav = () => {
     return (
         <ReadProductStack.Navigator
             initialRouteName='DefineBaseValue'
-            screenOptions={{ headerTitle: 'Ler produto'}}
+            screenOptions={({ navigation }) => ({
+                headerTitle: 'Ler produto',
+                headerRight: () => <MenuHeaderButton navigation={navigation} />,
+            })}
         >
             <ReadProductStack.Screen
                 name='ReadProduct'

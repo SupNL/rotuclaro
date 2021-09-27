@@ -4,7 +4,14 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Trash2, Edit } from 'react-native-feather';
 import COLORS from 'shared/COLORS';
 
-const ListItem = ({ label, onDelete }) => {
+const ListItem = ({
+    id,
+    label,
+    canDelete = true,
+    handleDelete,
+    canEdit = true,
+    handleEdit,
+}) => {
     return (
         <View style={styles.wrapper}>
             <View
@@ -22,26 +29,30 @@ const ListItem = ({ label, onDelete }) => {
                     flex: 4,
                 }}
             >
-                <TouchableOpacity
-                    activeOpacity={0.6}
-                    onPress={onDelete}
-                    style={{
-                        ...styles.touchable,
-                        backgroundColor: COLORS.secondary,
-                    }}
-                >
-                    <Edit stroke={COLORS.white} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    activeOpacity={0.6}
-                    onPress={onDelete}
-                    style={{
-                        ...styles.touchable,
-                        backgroundColor: COLORS.error,
-                    }}
-                >
-                    <Trash2 stroke={COLORS.white} />
-                </TouchableOpacity>
+                {canEdit && (
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => handleEdit(id, label)}
+                        style={{
+                            ...styles.touchable,
+                            backgroundColor: COLORS.secondary,
+                        }}
+                    >
+                        <Edit stroke={COLORS.white} />
+                    </TouchableOpacity>
+                )}
+                {canDelete && (
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => handleDelete(id, label)}
+                        style={{
+                            ...styles.touchable,
+                            backgroundColor: COLORS.error,
+                        }}
+                    >
+                        <Trash2 stroke={COLORS.white} />
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );

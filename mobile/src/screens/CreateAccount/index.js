@@ -6,7 +6,6 @@ import Input from 'components/Input';
 import CustomButton from 'components/CustomButton';
 import sharedStyles from 'shared/sharedStyles';
 import { useAuth } from 'hooks/useAuth';
-import ShowToast from 'utils/ShowToast';
 import api from 'services/api';
 import getUniqueId from 'utils/getUniqueId';
 
@@ -58,29 +57,17 @@ const CreateAccount = ({ navigation }) => {
                         signIn(data.username, data.password)
                             .then(() => {
                                 navigation.replace('UserNav');
-                            })
-                            .catch(() => {
-                                ShowToast(
-                                    'Ocorreu um erro inesperado. Tente novamente mais tarde.'
-                                );
                             });
                     })
                     .catch((err) => {
-                        console.log(err);
-                        if (err.response.status == 429) {
-                            ShowToast(
-                                'Muitas requisições feitas. Aguarde antes de poder criar a conta.'
-                            );
-                        } else if (err.response.status == 409) {
-                            ShowToast('Login em uso.');
-                            formRef.current.setErrors({
-                                username: 'Esse login já está em uso.',
-                            });
-                        } else {
-                            ShowToast(
-                                'Ocorreu um erro inesperado. Tente novamente mais tarde.'
-                            );
+                        if (err.response) {
+                            if (err.response.status == 409) {
+                                formRef.current.setErrors({
+                                    username: 'Esse login já está em uso.',
+                                });
+                            }
                         }
+                        console.error({ err });
                     });
             });
         }

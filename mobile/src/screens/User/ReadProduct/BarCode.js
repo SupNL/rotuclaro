@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, StyleSheet, View, Linking } from 'react-native';
+import {
+    StatusBar,
+    StyleSheet,
+    View,
+    Linking,
+    ToastAndroid,
+    ScrollView,
+} from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import CustomButton from 'components/CustomButton';
@@ -10,17 +17,21 @@ import api from 'services/api';
 import getUniqueId from 'utils/getUniqueId';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
+import ProductAlert from 'components/ProductAlert';
 
 const BarCode = ({ navigation }) => {
-    const { signOut } = useAuth();
-
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
 
     const [visibleAlertModal, setVisibleAlertModal] = useState(false);
     const [visibleNotFoundModal, setVisibleNotFoundModal] = useState(false);
+    const [visibleRequisitionsModal, setVisibleRequisitionsModal] =
+        useState(false);
 
     const [product, setProduct] = useState();
+    const [alert, setAlert] = useState({});
+
+    const { perfil } = useAuth();
 
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true);
@@ -33,13 +44,16 @@ const BarCode = ({ navigation }) => {
                 .then((res) => {
                     setProduct(res.data);
                     setVisibleAlertModal(true);
+                    const avisos = perfil.informarRestricoes(res.data);
+                    setAlert(avisos);
                 })
                 .catch((err) => {
-                    if (err.response.status == 404) {
-                        setVisibleNotFoundModal(true);
-                    } else if (err.response.status == 401) {
-                        ShowToast('Sessão expirada.');
-                        signOut();
+                    if (err.response) {
+                        if (err.response.status == 404) {
+                            setVisibleNotFoundModal(true);
+                        } else if (err.response.status == 429) {
+                            setVisibleRequisitionsModal(true);
+                        }
                     }
                 });
         });
@@ -54,12 +68,12 @@ const BarCode = ({ navigation }) => {
         >
             <CustomText>
                 O produto ainda não está cadastrado. Deseja solicitar o cadastro
-                desse produto?
+                deste produto?
             </CustomText>
             <CustomButton
                 title='Solicitar cadastro'
                 onPress={() => {
-                    ShowToast('Enviada.');
+                    ShowToast('Enviada.', ToastAndroid.TOP);
                     setVisibleNotFoundModal((old) => !old);
                     setScanned((old) => !old);
                 }}
@@ -85,7 +99,9 @@ const BarCode = ({ navigation }) => {
         >
             {product && (
                 <>
-                    <CustomText>Produto lido: {product.nome}</CustomText>
+                    <ScrollView>
+                        <ProductAlert alert={alert} profile={perfil} product={product} />
+                    </ScrollView>
                     <CustomButton
                         title='Ler outro produto'
                         onPress={() => {
@@ -101,6 +117,25 @@ const BarCode = ({ navigation }) => {
                     />
                 </>
             )}
+        </CustomModal>
+    );
+
+    const RequisitionsLimitModal = (
+        <CustomModal
+            visible={visibleRequisitionsModal}
+            onRequestClose={() => {
+                setVisibleRequisitionsModal((old) => !old);
+            }}
+        >
+            <CustomText>Aguarde um pouco antes de ler um produto</CustomText>
+            <CustomButton
+                title='Ok'
+                onPress={() => {
+                    setVisibleRequisitionsModal((old) => !old);
+                    setScanned((old) => !old);
+                }}
+                style={{ marginTop: 8 }}
+            />
         </CustomModal>
     );
 
@@ -155,6 +190,7 @@ const BarCode = ({ navigation }) => {
             <StatusBar hidden={true} />
             {ProductAlertModalScreen}
             {ProductNotFoundModalScreen}
+            {RequisitionsLimitModal}
             {hasPermission && (
                 <BarCodeScanner
                     onBarCodeScanned={

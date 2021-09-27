@@ -10,6 +10,7 @@ const COLORS = {
 
     error : '#c93434',
     warning : '#cfa602',
+    success: '#2abb2a',
 
     errorLight : '#f79e9e',
     warningLight : '#f5e190'

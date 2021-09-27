@@ -10,41 +10,48 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { View } from 'react-native';
 import api from 'services/api';
+import ErrorInterceptor from 'utils/ErrorInterceptor';
 
 const Navigator = () => {
     const { usuario } = useAuth();
     const Stack = createStackNavigator();
     const [initialRoute, setInitialRoute] = useState(null);
-    
+
     useEffect(() => {
         if (!usuario) return;
         if (usuario.unauthenticated) {
             setInitialRoute('LoginNav');
         } else {
-            api.get('/sessao').then(() => {
-                if (usuario.nivel == 0) {
-                    setInitialRoute('AdminNav');
-                } else {
-                    setInitialRoute('UserNav');
-                }
-            }).catch(() => {
-                setInitialRoute('LoginNav');
-            });
+            api.get('/sessao')
+                .then(() => {
+                    if (usuario.nivel == 0) {
+                        setInitialRoute('AdminNav');
+                    } else {
+                        setInitialRoute('UserNav');
+                    }
+                })
+                .catch(() => {
+                    setInitialRoute('LoginNav');
+                });
         }
     }, [usuario]);
 
     if (initialRoute != null) {
-        return <Stack.Navigator
-            initialRouteName={initialRoute}
-            screenOptions={{
-                headerShown: false,
-                
-            }}
-        >
-            <Stack.Screen name='LoginNav' component={LoginNavigation} />
-            <Stack.Screen name='UserNav' component={UserNavigation} />
-            <Stack.Screen name='AdminNav' component={AdminNavigation} />
-        </Stack.Navigator>;
+        return (
+            <Stack.Navigator
+                initialRouteName={initialRoute}
+                screenOptions={{
+                    headerShown: false,
+                }}
+            >
+                <Stack.Screen name='LoginNav' component={LoginNavigation} />
+                <Stack.Screen name='UserNav' component={UserNavigation} />
+                <Stack.Screen
+                    name='AdminNav'
+                    component={AdminNavigation}
+                />
+            </Stack.Navigator>
+        );
     }
 
     return <View></View>;
@@ -54,10 +61,12 @@ const MainNavigation = ({ children }) => {
     const navRef = useRef();
 
     return (
-        <NavigationContainer  ref={navRef}>
+        <NavigationContainer ref={navRef}>
             <AuthProvider navRef={navRef}>
-                <Navigator />
-                {children}
+                <ErrorInterceptor api={api}>
+                    <Navigator />
+                    {children}
+                </ErrorInterceptor>
             </AuthProvider>
         </NavigationContainer>
     );

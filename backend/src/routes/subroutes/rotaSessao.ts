@@ -23,7 +23,7 @@ rotaSessao.post(
                 where: {
                     login: login,
                 },
-                select: ['id', 'nome', 'senha', 'nivel'],
+                select: ['id', 'nome', 'senha', 'nivel', 'ativo'],
                 relations : ['perfil']
             });
 
@@ -39,6 +39,11 @@ rotaSessao.post(
             delete usuario.senha;
 
             if (resultado) {
+                if (usuario.ativo == false) {
+                    return res
+                        .status(403)
+                        .json({ message: 'Sua conta foi desativada' });
+                }
                 const token = jwt.sign(
                     {
                         id: usuario.id,

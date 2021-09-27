@@ -29,7 +29,8 @@
     "scripts": {
         "start": "ts-node src/index.ts",
         "typeorm": "ts-node ./node_modules/typeorm/cli.js",
-        "resetdb": "ts-node ./node_modules/typeorm/cli.js schema:drop && ts-node ./node_modules/typeorm/cli.js migration:run",
+        "cleardb": "ts-node ./node_modules/typeorm/cli.js schema:drop && ts-node ./node_modules/typeorm/cli.js migration:run",
+        "resetdb": "ts-node ./node_modules/typeorm/cli.js schema:drop && ts-node ./node_modules/typeorm/cli.js migration:run && ts-node src/database/script/fillDatabase.ts",
         "filldb": "ts-node src/database/script/fillDatabase.ts"
     }
 }
