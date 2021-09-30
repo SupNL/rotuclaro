@@ -1,11 +1,10 @@
 import CustomText from 'components/CustomText';
-import Header2 from 'components/Headers/Header2';
 import Header3 from 'components/Headers/Header3';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import COLORS from 'shared/COLORS';
 
-const ProductAlert = ({ profile, alert, product }) => {
+const ProductCompleteDetails = ({ alert, product }) => {
     const renderType = (type) => {
         return type == 'calorias' ? 'Kcal' : 'g';
     };
@@ -14,45 +13,32 @@ const ProductAlert = ({ profile, alert, product }) => {
         return alergenics.map((c, i) => {
             return (
                 <View key={i} style={{ flexWrap: 'wrap' }}>
-                    <Header2
+                    <Header3
                         style={{
                             ...styles.dangerAlergenicText,
-                            fontWeight: 'bold',
                         }}
                     >
-                        {c.toUpperCase()}
-                    </Header2>
+                        Contém {c.nome.toUpperCase()}
+                    </Header3>
                 </View>
             );
         });
     };
 
     const renderComponentsAlert = (components) => {
-        const noLowComponents = components.filter((c) => c.nivel !== 'baixo' && c.nivel !== 'ignorar');
-        return noLowComponents.map((c, i) => {
+        return components.map((c, i) => {
             return (
                 <View
                     key={i}
                     style={
                         c.nivel == 'alto'
                             ? styles.dangerFill
-                            : styles.warningFill
+                            : c.nivel == 'médio'
+                            ? styles.warningFill
+                            : styles.successFill
                     }
                 >
                     <View style={styles.componentWrapper}>
-                        <View>
-                            <Header2
-                                style={{
-                                    color:
-                                        c.nivel == 'alto'
-                                            ? COLORS.error
-                                            : COLORS.warning,
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                {c.nivel.toUpperCase()}
-                            </Header2>
-                        </View>
                         <View
                             style={{
                                 flexDirection: 'row',
@@ -65,7 +51,9 @@ const ProductAlert = ({ profile, alert, product }) => {
                                     color:
                                         c.nivel == 'alto'
                                             ? COLORS.error
-                                            : COLORS.warning,
+                                            : c.nivel == 'médio'
+                                            ? COLORS.warning
+                                            : COLORS.success,
                                 }}
                             >
                                 {c.tipo.charAt(0).toUpperCase() +
@@ -77,7 +65,9 @@ const ProductAlert = ({ profile, alert, product }) => {
                                     color:
                                         c.nivel == 'alto'
                                             ? COLORS.error
-                                            : COLORS.warning,
+                                            : c.nivel == 'médio'
+                                            ? COLORS.warning
+                                            : COLORS.success,
                                 }}
                             >
                                 {c.total + ' ' + renderType(c.tipo)}
@@ -88,9 +78,18 @@ const ProductAlert = ({ profile, alert, product }) => {
                         <CustomText>
                             Até {c.limiteAlto + ' ' + renderType(c.tipo)}
                         </CustomText>
+                    ) : c.nivel == 'médio' ? (
+                        <CustomText>
+                            Entre {c.limiteMedio + ' ' + renderType(c.tipo)} -{' '}
+                            {c.limiteAlto + ' ' + renderType(c.tipo)}
+                        </CustomText>
+                    ) : c.nivel == 'baixo' ? (
+                        <CustomText>
+                            Abaixo de {c.limiteMedio + ' ' + renderType(c.tipo)}
+                        </CustomText>
                     ) : (
                         <CustomText>
-                            Entre {c.limiteMedio + ' ' + renderType(c.tipo)} - {c.limiteAlto + ' ' + renderType(c.tipo)}
+                            Ignorado pelo perfil
                         </CustomText>
                     )}
                 </View>
@@ -102,20 +101,9 @@ const ProductAlert = ({ profile, alert, product }) => {
         <View style={{ ...styles.wrapper }}>
             {alert.componentes && alert.items ? (
                 <>
-                    <CustomText style={styles.headerTitle}>
-                        {product.nome}
-                    </CustomText>
-                    <CustomText
-                        style={{ ...styles.headerTitle, marginBottom: 12 }}
-                    >
-                        PORÇÃO DE {profile.gramas} g
-                    </CustomText>
                     {alert.componentes.length > 0 && (
                         <View style={styles.dangerAlergenicWrapper}>
-                            <Header3 style={styles.dangerAlergenicText}>
-                                Contém
-                            </Header3>
-                            {renderAlergenicAlert(alert.componentes)}
+                            {renderAlergenicAlert(product.componentesAlergenicos)}
                         </View>
                     )}
                     {alert.items.length > 0 &&
@@ -138,9 +126,8 @@ const ProductAlert = ({ profile, alert, product }) => {
 
 const styles = StyleSheet.create({
     wrapper: {
-        width: '100%',
-        alignItems: 'center',
-        padding: 16,
+        alignItems: 'flex-start',
+        padding: 0,
         marginBottom: 8,
     },
     componentWrapper: {
@@ -164,17 +151,24 @@ const styles = StyleSheet.create({
     },
 
     dangerFill: {
-        borderLeftColor: COLORS.error,
-        borderLeftWidth: 24,
-        paddingLeft: 8,
-        marginTop: 10,
+        borderBottomColor: COLORS.error,
+        borderBottomWidth: 8,
+        paddingBottom: 4,
+        marginTop: 12,
         width: '100%',
     },
     warningFill: {
-        borderLeftColor: COLORS.warning,
-        borderLeftWidth: 24,
-        paddingLeft: 8,
-        marginTop: 10,
+        borderBottomColor: COLORS.warning,
+        borderBottomWidth: 8,
+        paddingBottom: 4,
+        marginTop: 12,
+        width: '100%',
+    },
+    successFill: {
+        borderBottomColor: COLORS.success,
+        borderBottomWidth: 8,
+        paddingBottom: 4,
+        marginTop: 12,
         width: '100%',
     },
 
@@ -183,4 +177,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProductAlert;
+export default ProductCompleteDetails;

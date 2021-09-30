@@ -68,7 +68,6 @@ const AuthProvider = ({ children, navRef }) => {
             console.log('[AuthHook] Checking Session with available token');
             api.get('/sessao').catch(() => {
                 console.log('[AuthHook] Session expired');
-                signOut();
             });
         }
     }, [data.token, signOut]);

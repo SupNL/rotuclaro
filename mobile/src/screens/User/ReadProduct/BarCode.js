@@ -58,12 +58,27 @@ const BarCode = ({ navigation }) => {
                 });
         });
     };
+    
+    useEffect(() => {
+        if (!scanned) {
+            setVisibleAlertModal(false);
+            setVisibleNotFoundModal(false);
+            setVisibleRequisitionsModal(false);
+        }
+    }, [scanned]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setScanned(false);
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     const ProductNotFoundModalScreen = (
         <CustomModal
             visible={visibleNotFoundModal}
             onRequestClose={() => {
-                setVisibleNotFoundModal((old) => !old);
+                setScanned(false);
             }}
         >
             <CustomText>
@@ -74,16 +89,14 @@ const BarCode = ({ navigation }) => {
                 title='Solicitar cadastro'
                 onPress={() => {
                     ShowToast('Enviada.', ToastAndroid.TOP);
-                    setVisibleNotFoundModal((old) => !old);
-                    setScanned((old) => !old);
+                    setScanned(false);
                 }}
                 style={{ marginTop: 8 }}
             />
             <CustomButton
                 title='Ler outro produto'
                 onPress={() => {
-                    setVisibleNotFoundModal((old) => !old);
-                    setScanned((old) => !old);
+                    setScanned(false);
                 }}
                 style={{ marginTop: 8 }}
             />
@@ -94,27 +107,43 @@ const BarCode = ({ navigation }) => {
         <CustomModal
             visible={visibleAlertModal}
             onRequestClose={() => {
-                setVisibleAlertModal((old) => !old);
+                setScanned(false);
             }}
         >
             {product && (
                 <>
                     <ScrollView>
-                        <ProductAlert alert={alert} profile={perfil} product={product} />
+                        <ProductAlert
+                            alert={alert}
+                            profile={perfil}
+                            product={product}
+                        />
                     </ScrollView>
-                    <CustomButton
-                        title='Ler outro produto'
-                        onPress={() => {
-                            setVisibleAlertModal((old) => !old);
-                            setScanned((old) => !old);
-                        }}
-                        style={{ marginTop: 8 }}
-                    />
-                    <CustomButton
-                        title='Voltar ao menu'
-                        onPress={navigation.goBack}
-                        style={{ marginTop: 8 }}
-                    />
+                    <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                        <CustomButton
+                            title='Ver detalhes'
+                            onPress={() => {
+                                navigation.navigate('ProductDetails', {
+                                    alert, profile : perfil, product
+                                });
+                            }}
+                            style={{ flex: 1 }}
+                        />
+                    </View>
+                    <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                        <CustomButton
+                            title='Voltar'
+                            onPress={() => {
+                                setScanned(false);
+                            }}
+                            style={{ flex: 1, marginRight: 16 }}
+                        />
+                        <CustomButton
+                            title='Menu'
+                            onPress={navigation.goBack}
+                            style={{ flex: 1 }}
+                        />
+                    </View>
                 </>
             )}
         </CustomModal>
@@ -124,15 +153,14 @@ const BarCode = ({ navigation }) => {
         <CustomModal
             visible={visibleRequisitionsModal}
             onRequestClose={() => {
-                setVisibleRequisitionsModal((old) => !old);
+                setScanned(false);
             }}
         >
             <CustomText>Aguarde um pouco antes de ler um produto</CustomText>
             <CustomButton
                 title='Ok'
                 onPress={() => {
-                    setVisibleRequisitionsModal((old) => !old);
-                    setScanned((old) => !old);
+                    setScanned(false);
                 }}
                 style={{ marginTop: 8 }}
             />

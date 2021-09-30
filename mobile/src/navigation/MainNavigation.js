@@ -22,17 +22,11 @@ const Navigator = () => {
         if (usuario.unauthenticated) {
             setInitialRoute('LoginNav');
         } else {
-            api.get('/sessao')
-                .then(() => {
-                    if (usuario.nivel == 0) {
-                        setInitialRoute('AdminNav');
-                    } else {
-                        setInitialRoute('UserNav');
-                    }
-                })
-                .catch(() => {
-                    setInitialRoute('LoginNav');
-                });
+            if (usuario.nivel == 0) {
+                setInitialRoute('AdminNav');
+            } else {
+                setInitialRoute('UserNav');
+            }
         }
     }, [usuario]);
 
@@ -46,10 +40,7 @@ const Navigator = () => {
             >
                 <Stack.Screen name='LoginNav' component={LoginNavigation} />
                 <Stack.Screen name='UserNav' component={UserNavigation} />
-                <Stack.Screen
-                    name='AdminNav'
-                    component={AdminNavigation}
-                />
+                <Stack.Screen name='AdminNav' component={AdminNavigation} />
             </Stack.Navigator>
         );
     }

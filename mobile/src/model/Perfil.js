@@ -47,134 +47,130 @@ export class Perfil {
         avisos.componentes = avisos.componentes.filter((c) => c != null);
 
         let item;
-        item = this.converter(gramas, produto.kcal);
+        let componentInfo = {};
         avisos.items = [];
+
+        item = this.converter(gramas, produto.kcal);
+        componentInfo = {
+            tipo: 'calorias',
+            total: item,
+            limiteAlto: this.limiteAltoKcal,
+            limiteMedio: this.limiteMedioKcal,
+        };
         if (item > this.limiteAltoKcal) {
-            avisos.items.push({
-                tipo: 'calorias',
-                nivel: 'alto',
-                total: item,
-                limite: this.limiteAltoKcal,
-            });
+            componentInfo.nivel = 'alto';
         } else if (item > this.limiteMedioKcal) {
-            avisos.items.push({
-                tipo: 'calorias',
-                nivel: 'médio',
-                total: item,
-                limite: this.limiteMedioKcal,
-            });
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
         item = this.converter(gramas, produto.carboidratos);
+        componentInfo = {
+            tipo: 'carboidratos',
+            total: item,
+            limiteAlto: this.limiteAltoCarboidratos,
+            limiteMedio: this.limiteMedioCarboidratos,
+        };
         if (item > this.limiteAltoCarboidratos) {
-            avisos.items.push({
-                tipo: 'carboidratos',
-                nivel: 'alto',
-                total: item,
-                limite: this.limiteAltoCarboidratos,
-            });
+            componentInfo.nivel = 'alto';
         } else if (item > this.limiteMedioCarboidratos) {
-            avisos.items.push({
-                tipo: 'carboidratos',
-                total: item,
-                limite: this.limiteMedioCarboidratos,
-            });
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
         item = this.converter(gramas, produto.acucares);
+        componentInfo = {
+            tipo: 'açúcares',
+            total: item,
+            limiteAlto: this.limiteAltoAcucares,
+            limiteMedio: this.limiteMedioAcucares,
+        };
         if (item > this.limiteAltoAcucares) {
-            avisos.items.push({
-                tipo: 'açúcares',
-                nivel: 'alto',
-                total: item,
-                limite: this.limiteAltoAcucares,
-            });
+            componentInfo.nivel = 'alto';
         } else if (item > this.limiteMedioAcucares) {
-            avisos.items.push({
-                tipo: 'açúcares',
-                nivel: 'médio',
-                total: item,
-                limite: this.limiteMedioAcucares,
-            });
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
         item = this.converter(gramas, produto.gorduras);
+        componentInfo = {
+            tipo: 'gorduras totais',
+            total: item,
+            limiteAlto: this.limiteAltoGordurasTotais,
+            limiteMedio: this.limiteMedioGordurasTotais,
+        };
         if (item > this.limiteAltoGordurasTotais) {
-            avisos.items.push({
-                tipo: 'gorduras totais',
-                nivel: 'alto',
-                total: item,
-                limite: this.limiteAltoGordurasTotais,
-            });
+            componentInfo.nivel = 'alto';
         } else if (item > this.limiteMedioGordurasTotais) {
-            avisos.items.push({
-                tipo: 'gorduras totais',
-                nivel: 'médio',
-                total: item,
-                limite: this.limiteMedioGordurasTotais,
-            });
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
+        item = this.converter(gramas, produto.gordurasTrans);
+        componentInfo = {
+            tipo: 'gorduras trans',
+            total: item,
+            limiteAlto: this.limiteAltoGordurasTrans,
+            limiteMedio: this.limiteMedioGordurasTrans,
+        };
         if (
-            this.limiteMedioGordurasTrans != 0 &&
-            this.limiteAltoGordurasTrans != 0
+            this.limiteMedioGordurasTrans == 0 &&
+            this.limiteAltoGordurasTrans == 0
         ) {
-            item = this.converter(gramas, produto.gordurasTrans);
-            if (item > this.limiteAltoGordurasTrans) {
-                avisos.items.push({
-                    tipo: 'gorduras trans',
-                    nivel: 'alto',
-                    total: item,
-                    limite: this.limiteAltoGordurasTrans,
-                });
-            } else if (item > this.limiteMedioGordurasTrans) {
-                avisos.items.push({
-                    tipo: 'gorduras trans',
-                    nivel: 'médio',
-                    total: item,
-                    limite: this.limiteMedioGordurasTrans,
-                });
-            }
+            componentInfo.nivel = 'ignorar';
+        } else if (item > this.limiteAltoGordurasTrans) {
+            componentInfo.nivel = 'alto';
+        } else if (item > this.limiteMedioGordurasTrans) {
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
+        item = this.converter(gramas, produto.gordurasSaturadas);
+        componentInfo = {
+            tipo: 'gorduras trans',
+            total: item,
+            limiteAlto: this.limiteAltoGordurasSaturadas,
+            limiteMedio: this.limiteMedioGordurasSaturadas,
+        };
         if (
-            this.limiteMedioGordurasSaturadas != 0 &&
-            this.limiteAltoGordurasSaturadas != 0
+            this.limiteMedioGordurasSaturadas == 0 &&
+            this.limiteAltoGordurasSaturadas == 0
         ) {
-            item = this.converter(gramas, produto.gordurasSaturadas);
-            if (item > this.limiteAltoGordurasSaturadas) {
-                avisos.items.push({
-                    tipo: 'gorduras saturadas',
-                    nivel: 'alto',
-                    total: item,
-                    limite: this.limiteAltoGordurasSaturadas,
-                });
-            } else if (item > this.limiteMedioGordurasSaturadas) {
-                avisos.items.push({
-                    tipo: 'gorduras saturadas',
-                    nivel: 'médio',
-                    total: item,
-                    limite: this.limiteMedioGordurasSaturadas,
-                });
-            }
+            componentInfo.nivel = 'ignorar';
+        } else if (item > this.limiteAltoGordurasSaturadas) {
+            componentInfo.nivel = 'alto';
+        } else if (item > this.limiteMedioGordurasSaturadas) {
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
         item = this.converter(gramas, produto.sodio);
+        componentInfo = {
+            tipo: 'sódio',
+            total: item,
+            limiteAlto: this.limiteAltoSodio,
+            limiteMedio: this.limiteMedioSodio,
+        };
         if (item > this.limiteAltoSodio) {
-            avisos.items.push({
-                tipo: 'sódio (sal)',
-                nivel: 'alto',
-                total: item,
-                limite: this.limiteAltoSodio,
-            });
+            componentInfo.nivel = 'alto';
         } else if (item > this.limiteMedioSodio) {
-            avisos.items.push({
-                tipo: 'sódio (sal)',
-                nivel: 'médio',
-                total: item,
-                limite: this.limiteMedioSodio,
-            });
+            componentInfo.nivel = 'médio';
+        } else {
+            componentInfo.nivel = 'baixo';
         }
+        avisos.items.push(componentInfo);
 
         return avisos;
     }
