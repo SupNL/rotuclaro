@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
-import { FindManyOptions, MoreThan } from 'typeorm';
+import { FindManyOptions, Like, MoreThan } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { produtoLimiter } from '../../middleware/limitRequests';
@@ -10,7 +10,22 @@ const rotaProduto = Router();
 
 rotaProduto.get('/', expectAdmin, async (req, res) => {
     try {
-        const options: FindManyOptions = {};
+        const options: FindManyOptions = {
+            order : {
+                nome : 'ASC'
+            },
+        };
+
+        let where = {};
+
+        if (
+            typeof req.query['nome'] == 'string'
+        ) {
+            where = {
+                ...where,
+                nome : Like('%' + req.query['nome'] + '%'),
+            };
+        }
 
         if (
             typeof req.query.limit == 'string' &&
@@ -25,12 +40,17 @@ rotaProduto.get('/', expectAdmin, async (req, res) => {
         if (
             typeof req.query['last_name'] == 'string'
         ) {
-            options.where = {
+            where = {
+                ...where,
                 nome : MoreThan(req.query['last_name'])
             };
         }
 
-        const produtos = await ControleProduto.findMany(options);
+        options.where = where;
+
+        const [produtos, total] = await ControleProduto.findMany(options);
+
+        res.set('x-total-count', total.toString());
 
         return res.status(200).json(produtos);
     } catch (err) {
@@ -65,7 +85,7 @@ rotaProduto.get(
                 relations: ['componentesAlergenicos'],
             });
             if (produtos.length > 0) {
-                const produto = produtos[0];
+                const produto = produtos[0][0];
                 return res.status(200).json(produto);
             }
             return res.status(404).json({ message: 'Não encontrado' });
