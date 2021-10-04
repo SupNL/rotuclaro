@@ -29,7 +29,8 @@ export class Perfil {
     }
 
     converter(gramas, item) {
-        return item * (this.gramas / gramas);
+        const resultado = item * (this.gramas / gramas);
+        return Math.round((resultado + Number.EPSILON) * 10000) / 10000;
     }
 
     informarRestricoes(produto) {
