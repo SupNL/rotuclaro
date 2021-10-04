@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Header from 'components/Header';
-import { StyleSheet, View, ActivityIndicator, FlatList } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import axios from 'axios';
 
 import CustomText from 'components/CustomText';
 import sharedStyles from 'shared/sharedStyles';
 import CustomButton from 'components/CustomButton';
 import ConfirmDialog from 'components/ConfirmDialog';
-import SelectableComponent from 'components/SelectableComponent';
 import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
-import COLORS from 'shared/COLORS';
 import { useRef } from 'react';
+import SelectListedComponents from 'components/SelectListedComponents';
 
 const ChooseAlergenicComponents = ({ navigation, route }) => {
     const [components, setComponents] = useState([]);
@@ -27,7 +26,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
 
     const routeParams = route.params;
 
-    const fetchComponents = (tokenSource) => {
+    const fetchComponents = () => {
         let url = '/componente_alergenico';
         if(components.length > 0) {
             const length = components.length;
@@ -35,7 +34,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
             url += `?last_name=${lastName}`;
         }
         api.get(url, {
-            cancelToken: tokenSource,
+            cancelToken: source.token,
         })
             .then((response) => {
                 const data = response.data;
@@ -113,41 +112,8 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
         );
     };
 
-    const onComponentPress = (componentId) => {
-        const selectedIndex = selectedComponents.findIndex(
-            (item) => item.id === componentId
-        );
-        if (selectedIndex !== -1) {
-            setSelectedComponents((old) => {
-                return [
-                    ...old.slice(0, selectedIndex),
-                    ...old.slice(selectedIndex + 1),
-                ];
-            });
-        } else {
-            const element = components.find((item) => item.id === componentId);
-            setSelectedComponents((old) => {
-                return [...old, element];
-            });
-        }
-    };
-
-    const renderComponentItem = ({ item }) => {
-        return (
-            <SelectableComponent
-                key={item.id}
-                onPressAction={onComponentPress}
-                componentId={item.id}
-                componentName={item.nome}
-                isSelected={selectedComponents.find(
-                    (current) => current.id === item.id
-                )}
-            />
-        );
-    };
-
     useEffect(() => {
-        fetchComponents(source.token);
+        fetchComponents();
 
         return () => {
             try {
@@ -170,33 +136,13 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                 onPress={handleButtonConfirmation}
                 style={{ marginBottom: 8 }}
             />
-            <FlatList
-                data={components}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderComponentItem}
-                
-                ListFooterComponent={
-                    isLoading && <ActivityIndicator color={COLORS.secondary} />
-                }
-                onEndReachedThreshold={0.1}
-                onEndReached={() => {
-                    if (isLoading) fetchComponents(source.token);
-                }}
-
-                ListEmptyComponent={
-                    !isLoading && (
-                        <CustomText
-                            style={{
-                                marginBottom: 8,
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            No momento, não há nenhum componente alergênico
-                            cadastrado para seleção.
-                        </CustomText>
-                    )
-                }
-            />
+            <SelectListedComponents
+                components={components}
+                selectedComponents={selectedComponents}
+                setSelectedComponents={setSelectedComponents}
+                isLoading={isLoading}
+                handleFetch={fetchComponents}
+           />
         </View>
     );
 };
