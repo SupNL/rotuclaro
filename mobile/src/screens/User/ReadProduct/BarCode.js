@@ -3,14 +3,12 @@ import {
     StatusBar,
     StyleSheet,
     View,
-    Linking,
     ToastAndroid,
     ScrollView,
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import CustomButton from 'components/CustomButton';
-import ConfirmDialog from 'components/ConfirmDialog';
 import CustomModal from 'components/CustomModal';
 import CustomText from 'components/CustomText';
 import api from 'services/api';
@@ -18,6 +16,7 @@ import getUniqueId from 'utils/getUniqueId';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
 import ProductAlert from 'components/ProductAlert';
+import handleCameraPermission from 'utils/handleCameraPermission';
 
 const BarCode = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState(null);
@@ -169,47 +168,7 @@ const BarCode = ({ navigation }) => {
 
     useEffect(() => {
         BarCodeScanner.getPermissionsAsync().then((res) => {
-            if (!res.canAskAgain) {
-                ConfirmDialog(
-                    'Erro de permissão',
-                    'A aplicação não tem permissão para usar a câmera. Atualize as permissões em configurações',
-                    () => {
-                        Linking.openSettings().then(
-                            setTimeout(() => {
-                                BarCodeScanner.getPermissionsAsync().then(
-                                    (permission) => {
-                                        if (permission.canAskAgain) {
-                                            setHasPermission(
-                                                permission.granted
-                                            );
-                                        } else {
-                                            navigation.goBack();
-                                        }
-                                    }
-                                );
-                            }, 1)
-                        );
-                    },
-                    navigation.goBack,
-                    'Ir para configurações',
-                    'Cancelar'
-                );
-            } else if (hasPermission === null) {
-                BarCodeScanner.requestPermissionsAsync().then((permission) => {
-                    setHasPermission(permission.granted);
-                });
-            } else if (hasPermission === false) {
-                ConfirmDialog(
-                    'Erro de permissão',
-                    'O leitor de barras precisa de permissão da câmera. Dê a permissão para conseguir realizar uma leitura.',
-                    () => {
-                        setHasPermission(null);
-                    },
-                    navigation.goBack,
-                    'Definir permissão',
-                    'Cancelar'
-                );
-            }
+            handleCameraPermission(res, hasPermission, setHasPermission, navigation.goBack);
         });
     }, [hasPermission]);
 
