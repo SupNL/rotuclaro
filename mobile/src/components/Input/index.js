@@ -17,7 +17,7 @@ function Input({
 }) {
     const inputRef = useRef(null);
     const { fieldName, registerField, defaultValue, error } = useField(name);
-    const [currentValue, setCurrentValue] = useState(defaultValue);
+    const [currentValue, setCurrentValue] = useState(defaultValue ? defaultValue : '');
 
     useEffect(() => {
         inputRef.current.value = defaultValue;
@@ -36,6 +36,12 @@ function Input({
 
                 return '';
             },
+            setValue(ref, value) {
+                if (inputRef.current) {
+                    inputRef.current.value = value;
+                    setCurrentValue(value);
+                }
+            },
             clearValue() {
                 if (inputRef.current) {
                     inputRef.current.setNativeProps({ text: '' });
@@ -48,7 +54,7 @@ function Input({
     const handleChangeText = useCallback(
         (text) => {
             if (type === 'number') {
-                if (!text.match(/^(([0-9])*((\.|,)[0-9]{0,2})?)$/)) {
+                if (!text.match(/^(([0-9])*((\.|,)[0-9]{0,10})?)$/)) {
                     return;
                 }
             }
