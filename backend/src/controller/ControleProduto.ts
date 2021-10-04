@@ -13,14 +13,16 @@ export default {
 
     findMany(
         findOptions?: FindManyOptions
-    ): Promise<Produto[]> {
+    ): Promise<[Produto[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(Produto);
 
-            repo.find(findOptions)
-                .then((produtos) => resolve(produtos))
-                .catch((err) => reject(err));
+            repo.count().then(totalCount => {
+                repo.find(findOptions)
+                    .then((produtos) => resolve([produtos, totalCount]))
+                    .catch((err) => reject(err));
+            });
         });
     },
 
