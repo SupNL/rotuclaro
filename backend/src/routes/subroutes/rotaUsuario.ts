@@ -58,6 +58,7 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
 
         options.where = {
             ativo: true,
+            nivel : NivelUsuario.COMUM,
         };
 
         const usuarios = await ControleUsuario.findMany(options);
@@ -155,6 +156,74 @@ rotaUsuario.put(
         }
     }
 );
+
+
+rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
+    try {
+        const options: FindManyOptions = {};
+
+        if (
+            typeof req.query.limit == 'string' &&
+            !isNaN(parseInt(req.query.limit)) &&
+            parseInt(req.query.limit) > 0
+        ) {
+            options.take = Number(req.query.limit);
+        } else {
+            options.take = 10;
+        }
+
+        if (
+            typeof req.query.page == 'string' &&
+            !isNaN(parseInt(req.query.page)) &&
+            parseInt(req.query.page) > 0
+        ) {
+            options.skip = (Number(req.query.page) - 1) * options.take;
+        } else {
+            options.skip = 0;
+        }
+
+        options.where = {
+            ativo: true,
+            nivel : NivelUsuario.MODERADOR,
+        };
+
+        const usuarios = await ControleUsuario.findMany(options);
+
+        return res.status(200).json(usuarios);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Erro de servidor' });
+    }
+});
+
+
+
+rotaUsuario.post(
+    '/moderator/',
+    expectAdmin,
+    celebrate({
+        [Segments.BODY]: Joi.object().keys({
+            nome: Joi.string().required().min(1),
+            login: Joi.string().required().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
+            senha: Joi.string().required().min(1),
+        }),
+    }),
+    accountCreationLimiter,
+    async (req, res) => {
+        try {
+            const instance = ControleUsuario.convertBody(req.body);
+            instance.nivel = NivelUsuario.MODERADOR;
+            const usuario = await ControleUsuario.create(instance);
+            delete usuario.senha;
+
+            return res.status(201).json(usuario);
+        } catch (err) {
+            handleQueryFailedError(err, req, res);
+        }
+    }
+);
+
+
 
 rotaUsuario.delete('/:id', requireAuth, validateUser, async (req, res) => {
     try {
