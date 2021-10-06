@@ -54,7 +54,7 @@ function Input({
     const handleChangeText = useCallback(
         (text) => {
             if (type === 'number') {
-                if (!text.match(/^(([0-9])*((\.|,)[0-9]{0,10})?)$/)) {
+                if (!text.match(/^(([0-9])*((\.|,)[0-9]{0,1})?)$/)) {
                     return;
                 }
             }
