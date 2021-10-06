@@ -82,6 +82,7 @@ rotaPerfil.post(
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             gramas: Joi.number().required().greater(0),
+            ml: Joi.number().required().greater(0),
             limiteMedioKcal: Joi.number().required().greater(0),
             limiteAltoKcal: Joi.number().required().greater(0),
             limiteMedioCarboidratos: Joi.number().required().greater(0),
@@ -145,6 +146,7 @@ rotaPerfil.put(
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             gramas: Joi.number().optional().greater(0),
+            ml: Joi.number().optional().greater(0),
             limiteMedioKcal: Joi.number().optional().greater(0),
             limiteAltoKcal: Joi.number().optional().greater(0),
             limiteMedioCarboidratos: Joi.number().optional().greater(0),

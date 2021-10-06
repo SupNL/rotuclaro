@@ -31,7 +31,8 @@ const listaProdutos = [
     new Produto(
         '7891080400087',
         'MARGARINA COM SAL DELICIA 500G',
-        10, // Gramas por porção
+        10, // Gramas/ML por porção
+        false, // Alimento líquido?
         63, // Kcal
         0, // Carboidratos
         0, // Açúcares
@@ -47,7 +48,8 @@ const listaProdutos = [
     new Produto(
         '7898215151708',
         'LEITE UHT INTEGRAL PIRACANJUBA 1L',
-        200 * 1.36, // Gramas/ML por porção
+        200, // Gramas/ML por porção
+        true, // Alimento líquido?
         115, // Kcal
         9.1, // Carboidratos
         0, // Açúcares
@@ -64,6 +66,7 @@ const listaProdutos = [
         '7892840816803',
         'SALGADINHO ELMA CHIPS CHEETOS ONDA REQUEIJAO 37GR',
         37, // Gramas/ML por porção
+        false, // Alimento líquido?
         184, // Kcal
         24, // Carboidratos
         1.1, // Açúcares

@@ -103,7 +103,8 @@ rotaProduto.post(
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().required().min(1),
             nome: Joi.string().required().min(1),
-            gramasPorcao: Joi.number().required().greater(0),
+            gramasOuMlPorcao: Joi.number().required().greater(0),
+            liquido: Joi.bool().required(),
             kcal: Joi.number().required().min(0),
             carboidratos: Joi.number().required().min(0),
             acucares: Joi.number().required().min(0),
@@ -142,7 +143,8 @@ rotaProduto.put(
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().optional().min(1),
             nome: Joi.string().optional().min(1),
-            gramasPorcao: Joi.number().optional().greater(0),
+            gramasOuMlPorcao: Joi.number().optional().greater(0),
+            liquido: Joi.bool().optional(),
             kcal: Joi.number().optional().min(0),
             carboidratos: Joi.number().optional().min(0),
             acucares: Joi.number().optional().min(0),

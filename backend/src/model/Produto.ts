@@ -12,7 +12,8 @@ export class Produto {
     constructor(
         codigo?: string,
         nome?: string,
-        gramasPorcao?: number,
+        gramasOuMlPorcao?: number,
+        liquido?: boolean,
         kcal?: number,
         carboidratos?: number,
         acucares?: number,
@@ -27,7 +28,8 @@ export class Produto {
     ) {
         this.codigo = codigo;
         this.nome = nome;
-        this.gramasPorcao = gramasPorcao;
+        this.gramasOuMlPorcao = gramasOuMlPorcao;
+        this.liquido = liquido;
         this.kcal = kcal;
         this.carboidratos = carboidratos;
         this.acucares = acucares;
@@ -61,10 +63,17 @@ export class Produto {
 
     @Column({
         type: 'real',
-        name: 'gramas_porcao',
+        name: 'gramas_ou_ml_porcao',
         nullable: false,
     })
-    gramasPorcao: number;
+    gramasOuMlPorcao: number;
+
+    @Column({
+        type: 'bool',
+        name: 'liquido',
+        nullable: false,
+    })
+    liquido: boolean;
 
     @Column({
         type: 'real',

@@ -23,6 +23,13 @@ export class Perfil {
     gramas: number;
 
     @Column({
+        type: 'int',
+        name: 'ml',
+        nullable: false,
+    })
+    ml: number;
+
+    @Column({
         type: 'real',
         name: 'limite_medio_kcal',
         nullable: false,
