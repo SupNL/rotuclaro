@@ -129,13 +129,13 @@ const BarCode = ({ navigation }) => {
                             style={{ flex: 1 }}
                         />
                     </View>
-                    <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                    <View style={{ flexDirection: 'row', marginTop: 8 }}>
                         <CustomButton
                             title='Voltar'
                             onPress={() => {
                                 setScanned(false);
                             }}
-                            style={{ flex: 1, marginRight: 16 }}
+                            style={{ flex: 1, marginRight: 8 }}
                         />
                         <CustomButton
                             title='Menu'
