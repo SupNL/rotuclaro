@@ -4,6 +4,7 @@ import { useField } from '@unform/core';
 import { useState } from 'react';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import COLORS from 'shared/COLORS';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 function CustomSlider({
     name,
@@ -14,14 +15,19 @@ function CustomSlider({
     suffix,
     labelLeft,
     labelRight,
+    handleLabelPress,
     ...rest
 }) {
     const sliderRef = useRef(null);
     const deviceWidth = Dimensions.get('screen').width;
     const { fieldName, registerField, defaultValue } = useField(name);
 
-    const [leftValue, setLeftValue] = useState(defaultValue ? defaultValue[0] : 0);
-    const [rightValue, setRightValue] = useState(defaultValue ? defaultValue[1] : maxValue ? maxValue : 1000);
+    const [leftValue, setLeftValue] = useState(
+        defaultValue ? defaultValue[0] : 0
+    );
+    const [rightValue, setRightValue] = useState(
+        defaultValue ? defaultValue[1] : maxValue ? maxValue : 1000
+    );
 
     useEffect(() => {
         if (sliderRef.current) sliderRef.current.value = defaultValue;
@@ -35,6 +41,11 @@ function CustomSlider({
                 if (sliderRef.current) return sliderRef.current.value;
 
                 return '';
+            },
+            setValue(ref, value) {
+                if (sliderRef.current) sliderRef.current.value = value;
+                setLeftValue(value[0]);
+                setRightValue(value[1]);
             },
             clearValue() {
                 if (sliderRef.current) {
@@ -58,33 +69,55 @@ function CustomSlider({
 
     const CustomMarker = ({ color }) => {
         return (
-            <View style={{...styles.marker, backgroundColor : color}}></View>
+            <View style={{ ...styles.marker, backgroundColor: color }}></View>
         );
     };
 
     return (
         <View>
             {label && <Text style={{ fontWeight: 'bold' }}>{label}</Text>}
-            {labelLeft && <Text style={styles.warningText}>{labelLeft + leftValue / 100}{suffix}</Text>}
-            {labelRight && <Text style={styles.dangerText}>{labelRight + rightValue / 100}{suffix}</Text>}
+            <TouchableOpacity activeOpacity={0.8} onPress={() => handleLabelPress(name, leftValue, rightValue)}>
+                {labelLeft && (
+                    <Text style={styles.warningText}>
+                        {labelLeft + leftValue / 100}
+                        {suffix}
+                    </Text>
+                )}
+                {labelRight && (
+                    <Text style={styles.dangerText}>
+                        {labelRight + rightValue / 100}
+                        {suffix}
+                    </Text>
+                )}
+            </TouchableOpacity>
             <MultiSlider
                 isMarkersSeparated={true}
                 selectedStyle={{
-                    backgroundColor: COLORS.black
+                    backgroundColor: COLORS.black,
                 }}
                 unselectedStyle={{
-                    backgroundColor: COLORS.grey
+                    backgroundColor: COLORS.grey,
                 }}
                 customMarkerLeft={(e) => {
-                    return <CustomMarker currentValue={e.currentValue} color={COLORS.warning} />;
+                    return (
+                        <CustomMarker
+                            currentValue={e.currentValue}
+                            color={COLORS.warning}
+                        />
+                    );
                 }}
                 customMarkerRight={(e) => {
-                    return <CustomMarker currentValue={e.currentValue} color={COLORS.error} />;
+                    return (
+                        <CustomMarker
+                            currentValue={e.currentValue}
+                            color={COLORS.error}
+                        />
+                    );
                 }}
                 step={10}
                 snapped={true}
                 sliderLength={deviceWidth * 0.8}
-                values={[leftValue , rightValue]}
+                values={[leftValue, rightValue]}
                 min={minValue ? minValue : 0}
                 max={maxValue ? maxValue : 1000}
                 name={fieldName}
@@ -99,26 +132,26 @@ function CustomSlider({
 }
 
 const styles = StyleSheet.create({
-    marker : {
+    marker: {
         borderRadius: 100,
         width: 18,
         height: 18,
     },
 
-    warningText : {
+    warningText: {
         backgroundColor: COLORS.warningLight,
         fontWeight: 'bold',
         padding: 4,
-        borderTopLeftRadius : 8,
-        borderTopRightRadius : 8,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
     },
-    dangerText : {
+    dangerText: {
         backgroundColor: COLORS.errorLight,
         fontWeight: 'bold',
         padding: 4,
-        borderBottomLeftRadius : 8,
-        borderBottomRightRadius : 8,
-    }
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+    },
 });
 
 export default CustomSlider;
