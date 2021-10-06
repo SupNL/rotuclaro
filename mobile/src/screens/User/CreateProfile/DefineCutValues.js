@@ -10,26 +10,58 @@ import CustomButton from 'components/CustomButton';
 import CustomSlider from 'components/CustomSlider';
 import CustomModal from 'components/CustomModal';
 import { useEffect } from 'react';
+import Input from 'components/Input';
+import COLORS from 'shared/COLORS';
+
+const mapComponent = (name) => {
+    switch (name) {
+        case 'kcal-slider':
+            return 'calorias';
+        case 'carbo-slider':
+            return 'carboidratos';
+        case 'sugar-slider':
+            return 'açúcares';
+        case 'fat-slider':
+            return 'gorduras totais';
+        case 'fat-trans-slider':
+            return 'gorduras trans';
+        case 'fat-saturated-slider':
+            return 'gorduras saturadas';
+        case 'sodium-slider':
+            return 'sódio';
+    }
+};
 
 const DefineCutValues = ({ navigation, route }) => {
     const formRef = useRef(null);
-    const baseValue = Number(route.params.baseValue);
-    const proportionalBaseValue = baseValue * 100;
+    const gramValue = Number(route.params.gramValue);
+    const mlValue = Number(route.params.mlValue);
+    const proportionalBaseValue = gramValue * 100;
 
     const [check, setCheck] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [changeValueModalVisible, setChangeValueModalVisible] =
+        useState(false);
+
+    const [changingSlider, setChangingSlider] = useState(['', 0, 0]);
 
     useEffect(() => {
         setModalVisible(true);
     }, []);
 
-    const minValue = 10;
+    const minValue = 0;
 
     const handleSubmit = (data) => {
         navigation.navigate('ChooseAlergenicComponents', {
-            baseValue: baseValue,
+            gramValue,
+            mlValue,
             limitValues: data,
         });
+    };
+
+    const handleLabelPress = (name, leftValue, rightValue) => {
+        setChangingSlider([name, leftValue, rightValue]);
+        setChangeValueModalVisible(true);
     };
 
     const ModalScreen = (
@@ -60,18 +92,120 @@ const DefineCutValues = ({ navigation, route }) => {
         </CustomModal>
     );
 
+    const ChangeValueModalScreen = () => {
+        const changeFormRef = useRef(null);
+
+        const handleSubmit = (data) => {
+            if (parseFloat(data.med) >= parseFloat(data.high)) {
+                changeFormRef.current.setErrors({
+                    med: 'O valor médio deve ser menor que o alto',
+                });
+            } else {
+                formRef.current.setFieldValue(changingSlider[0], [
+                    parseFloat(data.med) * 100,
+                    parseFloat(data.high) * 100,
+                ]);
+                setChangeValueModalVisible(false);
+            }
+        };
+
+        return (
+            <CustomModal
+                visible={changeValueModalVisible}
+                onRequestClose={() => {
+                    setChangeValueModalVisible(false);
+                }}
+            >
+                <CustomText>
+                    Alterando {mapComponent(changingSlider[0])}
+                </CustomText>
+                <Form
+                    onSubmit={handleSubmit}
+                    ref={changeFormRef}
+                    initialData={{
+                        med: (
+                            Math.round(
+                                (changingSlider[1] / 100 + Number.EPSILON) * 100
+                            ) / 100
+                        ).toString(),
+                        high: (
+                            Math.round(
+                                (changingSlider[2] / 100 + Number.EPSILON) * 100
+                            ) / 100
+                        ).toString(),
+                    }}
+                >
+                    <Input
+                        name='med'
+                        label='Médio'
+                        placeholder='Corte médio'
+                        type='number'
+                        suffix={
+                            mapComponent(changingSlider[0]) !== 'calorias'
+                                ? 'g'
+                                : 'kcal'
+                        }
+                        style={{
+                            text: {
+                                textAlign: 'right',
+                            },
+                            padding: 8,
+                            backgroundColor: COLORS.warningLight,
+                            borderTopLeftRadius: 8,
+                            borderTopRightRadius: 8,
+                        }}
+                    />
+                    <Input
+                        name='high'
+                        label='Alto'
+                        placeholder='Corte alto'
+                        type='number'
+                        suffix={
+                            mapComponent(changingSlider[0]) !== 'calorias'
+                                ? 'g'
+                                : 'kcal'
+                        }
+                        style={{
+                            marginBottom: 8,
+                            text: {
+                                textAlign: 'right',
+                            },
+                            padding: 8,
+                            backgroundColor: COLORS.errorLight,
+                            borderBottomLeftRadius: 8,
+                            borderBottomRightRadius: 8,
+                        }}
+                    />
+                </Form>
+                <View style={{ flexDirection: 'row' }}>
+                    <CustomButton
+                        title='Alterar'
+                        onPress={() => changeFormRef.current.submitForm()}
+                        style={{ flex: 1, marginRight: 4 }}
+                    />
+                    <CustomButton
+                        title='Cancelar'
+                        onPress={() => setChangeValueModalVisible(false)}
+                        style={{ flex: 1 }}
+                    />
+                </View>
+            </CustomModal>
+        );
+    };
+
     return (
         <ScrollView>
             <View style={sharedStyles.defaultScreen}>
                 {ModalScreen}
+                <ChangeValueModalScreen />
                 <Header>Defina os valores de corte</Header>
                 <CustomText style={styles.text}>
                     Para cada componente, informe um valor de corte desejado. As
                     gorduras saturadas e trans são opcionais.
                 </CustomText>
                 <CustomText style={styles.text}>
-                    1. O primeiro corte te dará um alerta amarelo (médio), não é
-                    grave mas necessita de sua atenção.
+                    1. O primeiro corte te dará um alerta amarelo (médio),
+                    mostrando que necessita de sua atenção.
                 </CustomText>
                 <CustomText style={styles.text}>
                     2. O segundo corte te dará um alerta vermelho (ALTO), na
@@ -125,53 +259,55 @@ const DefineCutValues = ({ navigation, route }) => {
                 >
                     <CustomSlider
                         name='kcal-slider'
+                        handleLabelPress={handleLabelPress}
                         minValue={minValue}
-                        maxValue={proportionalBaseValue * 10}
-                        label={`Valor energético (Kcal) em ${
-                            proportionalBaseValue / 100
-                        } g`}
+                        maxValue={proportionalBaseValue * 8}
+                        label={`Valor energético (Kcal) em ${gramValue} g / ${mlValue} ml`}
+                        step={gramValue * 5}
                         suffix=' Kcal'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='carbo-slider'
+                        handleLabelPress={handleLabelPress}
                         minValue={minValue}
                         maxValue={proportionalBaseValue}
-                        label={`Carboidratos em ${
-                            proportionalBaseValue / 100
-                        } g`}
+                        label={`Carboidratos em ${gramValue} g / ${mlValue} ml`}
+                        step={gramValue}
                         suffix=' g de carboidratos'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='sugar-slider'
+                        handleLabelPress={handleLabelPress}
                         minValue={minValue}
-                        maxValue={proportionalBaseValue / 2}
-                        label={`Açúcares em ${proportionalBaseValue / 100} g`}
+                        maxValue={proportionalBaseValue}
+                        label={`Açúcares em ${gramValue} g / ${mlValue} ml`}
+                        step={gramValue}
                         suffix=' g de açúcares'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='fat-slider'
+                        handleLabelPress={handleLabelPress}
                         minValue={minValue}
                         maxValue={proportionalBaseValue}
-                        label={`Gorduras totais em ${
-                            proportionalBaseValue / 100
-                        } g`}
+                        label={`Gorduras totais em ${gramValue} g / ${mlValue} ml`}
+                        step={gramValue}
                         suffix=' g de gorduras totais'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
                     />
                     <CustomSlider
                         name='sodium-slider'
+                        handleLabelPress={handleLabelPress}
                         minValue={minValue}
                         maxValue={proportionalBaseValue / 20}
-                        label={`Sal (sódio) em ${
-                            proportionalBaseValue / 100
-                        } g`}
+                        label={`Sal (sódio) em ${gramValue} g / ${mlValue} ml`}
+                        step={gramValue / 10}
                         suffix=' g de sal'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
@@ -192,22 +328,22 @@ const DefineCutValues = ({ navigation, route }) => {
                         <>
                             <CustomSlider
                                 name='fat-trans-slider'
+                                handleLabelPress={handleLabelPress}
                                 minValue={minValue}
-                                maxValue={proportionalBaseValue / 2}
-                                label={`Gorduras trans em ${
-                                    proportionalBaseValue / 100
-                                } g`}
+                                maxValue={proportionalBaseValue}
+                                label={`Gorduras trans em ${gramValue} g / ${mlValue} ml`}
+                                step={gramValue}
                                 suffix=' g de gorduras trans'
                                 labelLeft='MÉDIO: '
                                 labelRight='ALTO: '
                             />
                             <CustomSlider
                                 name='fat-saturated-slider'
+                                handleLabelPress={handleLabelPress}
                                 minValue={minValue}
-                                maxValue={proportionalBaseValue / 2}
-                                label={`Gorduras saturadas em ${
-                                    proportionalBaseValue / 100
-                                } g`}
+                                maxValue={proportionalBaseValue}
+                                label={`Gorduras saturadas em ${gramValue} g / ${mlValue} ml`}
+                                step={gramValue}
                                 suffix=' g de gorduras saturadas'
                                 labelLeft='MÉDIO: '
                                 labelRight='ALTO: '
