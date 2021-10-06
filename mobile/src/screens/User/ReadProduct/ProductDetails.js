@@ -19,12 +19,12 @@ const ProductDetails = ({ route, navigation }) => {
     return (
         <View style={sharedStyles.horizontalAlignedScreen}>
             <Header3>{product.nome}</Header3>
-            <Header3 style={{ alignSelf : 'flex-end', marginBottom: 8, }}>Porção de {profile.gramas} g</Header3>
-            <ScrollView contentContainerStyle={{ width: screenWidth * 0.85}}>
-                <ProductCompleteDetails
-                    alert={alert}
-                    product={product}
-                />
+            <Header3 style={{ alignSelf: 'flex-end', marginBottom: 8 }}>
+                Porção de{' '}
+                {product.liquido ? profile.ml + ' ml' : profile.gramas + ' g'}
+            </Header3>
+            <ScrollView contentContainerStyle={{ width: screenWidth * 0.85 }}>
+                <ProductCompleteDetails alert={alert} product={product} />
             </ScrollView>
             <CustomButton
                 title='Voltar'

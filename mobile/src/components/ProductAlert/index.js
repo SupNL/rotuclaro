@@ -108,7 +108,7 @@ const ProductAlert = ({ profile, alert, product }) => {
                     <CustomText
                         style={{ ...styles.headerTitle, marginBottom: 12 }}
                     >
-                        PORÇÃO DE {profile.gramas} g
+                        PORÇÃO DE {product.liquido ? profile.ml + ' ml' : profile.gramas + ' g'}
                     </CustomText>
                     {alert.componentes.length > 0 && (
                         <View style={styles.dangerAlergenicWrapper}>

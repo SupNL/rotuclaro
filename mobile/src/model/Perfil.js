@@ -1,6 +1,7 @@
 export class Perfil {
     constructor(perfilObject) {
         this.gramas = perfilObject.gramas;
+        this.ml = perfilObject.ml;
 
         this.limiteMedioKcal = perfilObject.limiteMedioKcal;
         this.limiteAltoKcal = perfilObject.limiteAltoKcal;
@@ -28,14 +29,19 @@ export class Perfil {
         this.componentesAlergenicos = perfilObject.componentesAlergenicos;
     }
 
-    converter(gramas, item) {
-        const resultado = item * (this.gramas / gramas);
-        return Math.round((resultado + Number.EPSILON) * 10000) / 10000;
+    converter(gramasOuMl, liquido, item) {
+        let resultado;
+        if(liquido) {
+            resultado = item * (this.ml / gramasOuMl);
+        } else {
+            resultado = item * (this.gramas / gramasOuMl);
+        }
+        return Math.round((resultado + Number.EPSILON) * 10) / 10;
     }
 
     informarRestricoes(produto) {
         let avisos = {};
-        const gramas = produto.gramasPorcao;
+        const gramas = produto.gramasOuMlPorcao;
 
         avisos.componentes = produto.componentesAlergenicos.map((c) => {
             const result = this.componentesAlergenicos.find(
@@ -51,7 +57,7 @@ export class Perfil {
         let componentInfo = {};
         avisos.items = [];
 
-        item = this.converter(gramas, produto.kcal);
+        item = this.converter(gramas, produto.liquido, produto.kcal);
         componentInfo = {
             tipo: 'calorias',
             total: item,
@@ -67,7 +73,7 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.carboidratos);
+        item = this.converter(gramas, produto.liquido, produto.carboidratos);
         componentInfo = {
             tipo: 'carboidratos',
             total: item,
@@ -83,7 +89,7 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.acucares);
+        item = this.converter(gramas, produto.liquido, produto.acucares);
         componentInfo = {
             tipo: 'açúcares',
             total: item,
@@ -99,7 +105,7 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.gorduras);
+        item = this.converter(gramas, produto.liquido, produto.gorduras);
         componentInfo = {
             tipo: 'gorduras totais',
             total: item,
@@ -115,7 +121,7 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.gordurasTrans);
+        item = this.converter(gramas, produto.liquido, produto.gordurasTrans);
         componentInfo = {
             tipo: 'gorduras trans',
             total: item,
@@ -136,9 +142,9 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.gordurasSaturadas);
+        item = this.converter(gramas, produto.liquido, produto.gordurasSaturadas);
         componentInfo = {
-            tipo: 'gorduras trans',
+            tipo: 'gorduras saturadas',
             total: item,
             limiteAlto: this.limiteAltoGordurasSaturadas,
             limiteMedio: this.limiteMedioGordurasSaturadas,
@@ -157,7 +163,7 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.sodio);
+        item = this.converter(gramas, produto.liquido, produto.sodio);
         componentInfo = {
             tipo: 'sódio',
             total: item,

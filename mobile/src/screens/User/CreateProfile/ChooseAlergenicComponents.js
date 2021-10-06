@@ -55,7 +55,8 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
     const handleSubmit = () => {
         const limitValues = routeParams.limitValues;
         const submitData = {
-            gramas: routeParams.baseValue,
+            gramas: routeParams.gramValue,
+            ml: routeParams.mlValue,
             limiteMedioKcal: limitValues['kcal-slider'][0] / 100,
             limiteAltoKcal: limitValues['kcal-slider'][1] / 100,
             limiteMedioCarboidratos: limitValues['carbo-slider'][0] / 100,
