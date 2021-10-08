@@ -84,7 +84,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                     ? selectedComponents.map((c) => ({
                           id: c.id,
                       }))
-                    : undefined,
+                    : [],
         };
         api.post('/perfil', submitData)
             .then((res) => {

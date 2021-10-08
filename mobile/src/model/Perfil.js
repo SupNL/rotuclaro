@@ -29,9 +29,16 @@ export class Perfil {
         this.componentesAlergenicos = perfilObject.componentesAlergenicos;
     }
 
+    ignoraExtra() {
+        return (
+            this.limiteMedioGordurasTrans === 0 &&
+            this.limiteAltoGordurasTrans === 0
+        );
+    }
+
     converter(gramasOuMl, liquido, item) {
         let resultado;
-        if(liquido) {
+        if (liquido) {
             resultado = item * (this.ml / gramasOuMl);
         } else {
             resultado = item * (this.gramas / gramasOuMl);
@@ -142,7 +149,11 @@ export class Perfil {
         }
         avisos.items.push(componentInfo);
 
-        item = this.converter(gramas, produto.liquido, produto.gordurasSaturadas);
+        item = this.converter(
+            gramas,
+            produto.liquido,
+            produto.gordurasSaturadas
+        );
         componentInfo = {
             tipo: 'gorduras saturadas',
             total: item,

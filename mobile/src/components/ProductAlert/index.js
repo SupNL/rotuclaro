@@ -28,7 +28,9 @@ const ProductAlert = ({ profile, alert, product }) => {
     };
 
     const renderComponentsAlert = (components) => {
-        const noLowComponents = components.filter((c) => c.nivel !== 'baixo' && c.nivel !== 'ignorar');
+        const noLowComponents = components.filter(
+            (c) => c.nivel !== 'baixo' && c.nivel !== 'ignorar'
+        );
         return noLowComponents.map((c, i) => {
             return (
                 <View
@@ -90,7 +92,8 @@ const ProductAlert = ({ profile, alert, product }) => {
                         </CustomText>
                     ) : (
                         <CustomText>
-                            Entre {c.limiteMedio + ' ' + renderType(c.tipo)} - {c.limiteAlto + ' ' + renderType(c.tipo)}
+                            Entre {c.limiteMedio + ' ' + renderType(c.tipo)} -{' '}
+                            {c.limiteAlto + ' ' + renderType(c.tipo)}
                         </CustomText>
                     )}
                 </View>
@@ -108,7 +111,10 @@ const ProductAlert = ({ profile, alert, product }) => {
                     <CustomText
                         style={{ ...styles.headerTitle, marginBottom: 12 }}
                     >
-                        PORÇÃO DE {product.liquido ? profile.ml + ' ml' : profile.gramas + ' g'}
+                        PORÇÃO DE{' '}
+                        {product.liquido
+                            ? profile.ml + ' ml'
+                            : profile.gramas + ' g'}
                     </CustomText>
                     {alert.componentes.length > 0 && (
                         <View style={styles.dangerAlergenicWrapper}>
@@ -121,7 +127,11 @@ const ProductAlert = ({ profile, alert, product }) => {
                     {alert.items.length > 0 &&
                         renderComponentsAlert(alert.items)}
                     <View>
-                        {alert.items.length == 0 &&
+                        {alert.items.every(
+                            (item) =>
+                                item.nivel === 'baixo' ||
+                                item.nivel === 'ignorar'
+                        ) &&
                             alert.componentes.length == 0 && (
                                 <CustomText style={styles.safeProductText}>
                                     Produto em conformidade com seu perfil.

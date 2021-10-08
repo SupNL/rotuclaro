@@ -11,7 +11,7 @@ import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
 import ProductNavigation from './ProductNavigation';
 
-const AdminNavigation = ({ renderMenuButton }) => {
+const AdminNavigation = () => {
     const AdminDrawer = createDrawerNavigator();
     const { signOut } = useAuth();
 
@@ -41,19 +41,16 @@ const AdminNavigation = ({ renderMenuButton }) => {
                 name='MainScreenNav'
                 component={ReportScreenNavigation}
                 options={{ title: 'Relatórios' }}
-                renderMenuButton={renderMenuButton}
             />
             <AdminDrawer.Screen
                 name='AlergenicComponentScreenNav'
                 component={AlergenicComponentNavigation}
                 options={{ title: 'Componentes alergênicos' }}
-                renderMenuButton={renderMenuButton}
             />
             <AdminDrawer.Screen
                 name='ProductScreenNav'
                 component={ProductNavigation}
                 options={{ title: 'Produtos' }}
-                renderMenuButton={renderMenuButton}
             />
         </AdminDrawer.Navigator>
     );

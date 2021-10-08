@@ -70,7 +70,8 @@ export default {
                     const repo = manager.getRepository(Perfil);
 
                     const old = await repo.findOne(id);
-                    const merged = repo.merge(old, perfil);
+                    const merged = repo.merge(perfil, old);
+                    merged.componentesAlergenicos = perfil.componentesAlergenicos;
                     return await repo.save(merged);
                 })
                 .then((editedPerfil) => {

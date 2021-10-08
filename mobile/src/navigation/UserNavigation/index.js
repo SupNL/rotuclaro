@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import {
     createDrawerNavigator,
     DrawerContentScrollView,
@@ -11,6 +10,7 @@ import ReadProductNav from './ReadProductNav';
 import CreateProfileNavigation from './CreateProfileNavigation';
 import { useAuth } from 'hooks/useAuth';
 import ShowToast from 'utils/ShowToast';
+import EditProfileNavigation from './EditProfileNavigation';
 
 const UserNavigation = () => {
     const UserDrawer = createDrawerNavigator();
@@ -28,6 +28,7 @@ const UserNavigation = () => {
         newState.routes = newState.routes.filter(
             (item) => item.name !== 'CreateProfileNav'
         );
+
         return (
             <DrawerContentScrollView {...props}>
                 <DrawerItemList state={newState} {...rest} />
@@ -46,19 +47,24 @@ const UserNavigation = () => {
         <UserDrawer.Navigator
             initialRouteName={initialRoute}
             drawerContent={renderDrawerContent}
-            drawerPosition="right"
+            drawerPosition='right'
             detachInactiveScreens={true}
         >
-            <UserDrawer.Screen
-                name='CreateProfileNav'
-                customDrawerContent={() => <View></View>}
-                component={CreateProfileNavigation}
-                options={{ swipeEnabled: false }}
-            />
             <UserDrawer.Screen
                 name='ReadProductNav'
                 component={ReadProductNav}
                 options={{ title: 'Ler produto' }}
+            />
+            <UserDrawer.Screen
+                name='EditProfileNavigation'
+                component={EditProfileNavigation}
+                options={{ title: 'Alterar perfil' }}
+            />
+            {/* não clickáveis */}
+            <UserDrawer.Screen
+                name='CreateProfileNav'
+                component={CreateProfileNavigation}
+                options={{ swipeEnabled: false }}
             />
         </UserDrawer.Navigator>
     );

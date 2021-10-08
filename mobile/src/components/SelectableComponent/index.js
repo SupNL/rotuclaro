@@ -23,8 +23,8 @@ const SelectableComponent = ({ componentId, componentName, isSelected, onPressAc
 const styles = StyleSheet.create({
     wrapper: {
         backgroundColor: COLORS.white,
-        padding: 16,
-        marginBottom: 16,
+        padding: 12,
+        marginBottom: 12,
         borderRadius: 8,
 
         borderWidth: 1,
