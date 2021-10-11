@@ -3,12 +3,13 @@ import { Router } from 'express';
 import { FindManyOptions, Like, MoreThan } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
 import { expectAdmin } from '../../middleware/expectAdmin';
+import { expectAdminOrModerator } from '../../middleware/expectAdminOrModerator';
 import { produtoLimiter } from '../../middleware/limitRequests';
 import { handleQueryFailedError } from '../../utils/errorHandler';
 
 const rotaProduto = Router();
 
-rotaProduto.get('/', expectAdmin, async (req, res) => {
+rotaProduto.get('/', expectAdminOrModerator, async (req, res) => {
     try {
         const options: FindManyOptions = {
             order : {
@@ -98,7 +99,7 @@ rotaProduto.get(
 
 rotaProduto.post(
     '/',
-    expectAdmin,
+    expectAdminOrModerator,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().required().min(1),
@@ -138,7 +139,7 @@ rotaProduto.post(
 
 rotaProduto.put(
     '/:id',
-    expectAdmin,
+    expectAdminOrModerator,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             codigo: Joi.string().optional().min(1),
