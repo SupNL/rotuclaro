@@ -1,5 +1,5 @@
 import { FindManyOptions, FindOneOptions, getConnection } from 'typeorm';
-import { Usuario } from '../model/Usuario';
+import { NivelUsuario, Usuario } from '../model/Usuario';
 
 export default {
     convertBody(
@@ -13,14 +13,31 @@ export default {
 
     findMany(
         findOptions?: FindManyOptions
-    ): Promise<Usuario[]> {
+    ): Promise<[Usuario[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(Usuario);
 
-            repo.find(findOptions)
-                .then((usuarios) => resolve(usuarios))
-                .catch((err) => reject(err));
+            let countWhere : FindManyOptions<Usuario>;
+            if(findOptions && findOptions.where && findOptions.where['nivel'] === NivelUsuario.MODERADOR) {
+                countWhere = {
+                    where : {
+                        nivel : NivelUsuario.MODERADOR
+                    }
+                };
+            } else {
+                countWhere = {
+                    where : {
+                        nivel : NivelUsuario.COMUM
+                    }
+                };
+            }
+
+            repo.count(countWhere).then(totalCount => {
+                repo.find(findOptions)
+                    .then((usuarios) => resolve([usuarios, totalCount]))
+                    .catch((err) => reject(err));
+            });
         });
     },
 

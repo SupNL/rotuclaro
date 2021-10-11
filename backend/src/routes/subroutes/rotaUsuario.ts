@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { NextFunction, Request, Response, Router } from 'express';
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, LessThan, MoreThan } from 'typeorm';
 import ControleUsuario from '../../controller/ControleUsuario';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { accountCreationLimiter } from '../../middleware/limitRequests';
@@ -35,7 +35,11 @@ const validateUser = async (
 
 rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
     try {
-        const options: FindManyOptions = {};
+        const options: FindManyOptions = {
+            order : {
+                id : 'DESC'
+            },
+        };
 
         if (
             typeof req.query.limit == 'string' &&
@@ -69,7 +73,18 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
             };
         }
 
-        const usuarios = await ControleUsuario.findMany(options);
+        if (
+            typeof req.query['last_id'] == 'string'
+        ) {
+            options.where = {
+                ...options.where,
+                id : LessThan(req.query['last_id'])
+            };
+        }
+
+        const [usuarios, total] = await ControleUsuario.findMany(options);
+
+        res.set('x-total-count', total.toString());
 
         return res.status(200).json(usuarios);
     } catch (err) {
@@ -87,6 +102,7 @@ rotaUsuario.get('/:id', requireAuth, validateUser, async (req, res) => {
                 ativo: true,
             },
             relations: ['perfil'],
+            select : ['id', 'nome', 'login', 'nivel', 'perfil']
         });
 
         if (usuario) return res.status(200).json(usuario);

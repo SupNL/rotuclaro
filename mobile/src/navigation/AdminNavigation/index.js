@@ -10,6 +10,7 @@ import AlergenicComponentNavigation from './AlergenicComponentNavigation';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
 import ProductNavigation from './ProductNavigation';
+import ModeratorNavigation from './ModeratorNavigation';
 
 const AdminNavigation = () => {
     const AdminDrawer = createDrawerNavigator();
@@ -51,6 +52,11 @@ const AdminNavigation = () => {
                 name='ProductScreenNav'
                 component={ProductNavigation}
                 options={{ title: 'Produtos' }}
+            />
+            <AdminDrawer.Screen
+                name='ModeratorScreenNav'
+                component={ModeratorNavigation}
+                options={{ title: 'Moderadores' }}
             />
         </AdminDrawer.Navigator>
     );
