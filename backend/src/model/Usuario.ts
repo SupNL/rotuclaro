@@ -6,7 +6,7 @@ import {
     OneToOne,
     PrimaryGeneratedColumn,
 } from 'typeorm';
-import { genSalt, hash } from 'bcryptjs';
+import { hash } from 'bcryptjs';
 
 import { Perfil } from './Perfil';
 

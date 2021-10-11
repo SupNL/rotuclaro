@@ -5,6 +5,7 @@ import ControleUsuario from '../../controller/ControleUsuario';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { accountCreationLimiter } from '../../middleware/limitRequests';
 import { requireAuth } from '../../middleware/requireAuth';
+import { validateAuth } from '../../middleware/validateAuth';
 import { NivelUsuario } from '../../model/Usuario';
 import { handleQueryFailedError } from '../../utils/errorHandler';
 
@@ -56,10 +57,17 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
             options.skip = 0;
         }
 
-        options.where = {
-            ativo: true,
-            nivel : NivelUsuario.COMUM,
-        };
+        if (typeof req.query.moderador == 'string' && req.query.moderador === 'true') {
+            options.where = {
+                ativo: true,
+                nivel: NivelUsuario.MODERADOR,
+            };
+        } else {
+            options.where = {
+                ativo: true,
+                nivel: NivelUsuario.COMUM,
+            };
+        }
 
         const usuarios = await ControleUsuario.findMany(options);
 
@@ -99,13 +107,24 @@ rotaUsuario.post(
             .unknown(),
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().required().min(1),
-            login: Joi.string().required().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
+            login: Joi.string()
+                .required()
+                .min(1)
+                .regex(new RegExp('^[a-zA-Z0-9@]*$')),
             senha: Joi.string().required().min(1),
+            nivel: Joi.string().valid('moderador').optional(),
         }),
     }),
+    validateAuth,
     accountCreationLimiter,
     async (req, res) => {
         try {
+            if (!req.usuario || req.usuario.nivel !== NivelUsuario.ADMIN) {
+                delete req.body['nivel'];
+            } else if (req.body['nivel']) {
+                req.body.nivel = NivelUsuario.MODERADOR;
+            }
+
             const instance = ControleUsuario.convertBody(req.body);
             const usuario = await ControleUsuario.create(instance);
             delete usuario.senha;
@@ -124,7 +143,10 @@ rotaUsuario.put(
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().optional().min(1),
-            login: Joi.string().optional().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
+            login: Joi.string()
+                .optional()
+                .min(1)
+                .regex(new RegExp('^[a-zA-Z0-9@]*$')),
             senha: Joi.string().optional().min(1),
         }),
     }),
@@ -157,7 +179,6 @@ rotaUsuario.put(
     }
 );
 
-
 rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
     try {
         const options: FindManyOptions = {};
@@ -184,7 +205,7 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
 
         options.where = {
             ativo: true,
-            nivel : NivelUsuario.MODERADOR,
+            nivel: NivelUsuario.MODERADOR,
         };
 
         const usuarios = await ControleUsuario.findMany(options);
@@ -196,15 +217,16 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
     }
 });
 
-
-
 rotaUsuario.post(
     '/moderator/',
     expectAdmin,
     celebrate({
         [Segments.BODY]: Joi.object().keys({
             nome: Joi.string().required().min(1),
-            login: Joi.string().required().min(1).regex(new RegExp('^[a-zA-Z0-9@]*$')),
+            login: Joi.string()
+                .required()
+                .min(1)
+                .regex(new RegExp('^[a-zA-Z0-9@]*$')),
             senha: Joi.string().required().min(1),
         }),
     }),
@@ -222,8 +244,6 @@ rotaUsuario.post(
         }
     }
 );
-
-
 
 rotaUsuario.delete('/:id', requireAuth, validateUser, async (req, res) => {
     try {

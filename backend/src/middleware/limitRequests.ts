@@ -30,4 +30,10 @@ export const accountCreationLimiter = rateLimit({
     max: 1,
     keyGenerator: customImeiKeyGenerator,
     skipFailedRequests: true,
+    skip: (req) => {
+        if (req.usuario) {
+            if (req.usuario.nivel == NivelUsuario.ADMIN) return true;
+        }
+        return false;
+    },
 });
