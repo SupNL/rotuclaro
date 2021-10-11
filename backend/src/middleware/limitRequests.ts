@@ -19,7 +19,11 @@ export const produtoLimiter = rateLimit({
     skipFailedRequests: true,
     skip: (req) => {
         if (req.usuario) {
-            if (req.usuario.nivel == NivelUsuario.ADMIN) return true;
+            if (
+                req.usuario.nivel == NivelUsuario.ADMIN ||
+                req.usuario.nivel == NivelUsuario.MODERADOR
+            )
+                return true;
         }
         return false;
     },
