@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 interface jwtPayloadObject {
     id: number;
     nivel: number;
-    nome : string;
     login : string;
 }
 
@@ -27,14 +26,20 @@ export function logRequest(
         try {
             const [, token] = authorization.split('Bearer ');
             const decoded = jwt.verify(token, process.env.SERVER_SECRET);
-            const { nome, login } = decoded as jwtPayloadObject;
-            message += `${login} (${nome})`;
+            const { login } = decoded as jwtPayloadObject;
+            message += `${login}`;
         } catch (err) {
             message += 'com token inválido';
         }
     } else {
         message += 'não autenticado';
     }
+
+    if(req.body) {
+        message += '\nBody: ';
+        message += JSON.stringify(req.body);
+    }
+    
 
     console.log(message);
     return next();
