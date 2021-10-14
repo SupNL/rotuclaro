@@ -8,6 +8,7 @@ import CustomModal from 'components/CustomModal';
 import CustomText from 'components/CustomText';
 import Input from 'components/Input';
 import CheckBox from '@react-native-community/checkbox';
+import LoadingCircle from 'components/LoadingCircle';
 
 const mapComponent = (name) => {
     switch (name) {
@@ -28,10 +29,21 @@ const mapComponent = (name) => {
     }
 };
 
-const CutValuesForm = ({ formRef, handleSubmit, initialData, gramValue, mlValue, submitLabel, ignoreExtra }) => {
+const CutValuesForm = ({
+    formRef,
+    handleSubmit,
+    initialData,
+    gramValue,
+    mlValue,
+    submitLabel,
+    submitIsLoading,
+    ignoreExtra,
+}) => {
     const minValue = 0;
 
-    const [check, setCheck] = useState(ignoreExtra == null ? false : !ignoreExtra);
+    const [check, setCheck] = useState(
+        ignoreExtra == null ? false : !ignoreExtra
+    );
     const [changingSlider, setChangingSlider] = useState(['', 0, 0]);
     const [changeValueModalVisible, setChangeValueModalVisible] =
         useState(false);
@@ -156,45 +168,49 @@ const CutValuesForm = ({ formRef, handleSubmit, initialData, gramValue, mlValue,
                 name='kcal-slider'
                 handleLabelPress={handleLabelPress}
                 minValue={minValue}
-                maxValue={(gramValue * 100) * 8}
+                maxValue={gramValue * 100 * 8}
                 label={`Valor energético (Kcal) em ${gramValue} g / ${mlValue} ml`}
                 step={gramValue * 5}
                 suffix=' Kcal'
                 labelLeft='MÉDIO: '
                 labelRight='ALTO: '
+                disabled={submitIsLoading}
             />
             <CustomSlider
                 name='carbo-slider'
                 handleLabelPress={handleLabelPress}
                 minValue={minValue}
-                maxValue={(gramValue * 100)}
+                maxValue={gramValue * 100}
                 label={`Carboidratos em ${gramValue} g / ${mlValue} ml`}
                 step={gramValue}
                 suffix=' g de carboidratos'
                 labelLeft='MÉDIO: '
                 labelRight='ALTO: '
+                disabled={submitIsLoading}
             />
             <CustomSlider
                 name='sugar-slider'
                 handleLabelPress={handleLabelPress}
                 minValue={minValue}
-                maxValue={(gramValue * 100)}
+                maxValue={gramValue * 100}
                 label={`Açúcares em ${gramValue} g / ${mlValue} ml`}
                 step={gramValue}
                 suffix=' g de açúcares'
                 labelLeft='MÉDIO: '
                 labelRight='ALTO: '
+                disabled={submitIsLoading}
             />
             <CustomSlider
                 name='fat-slider'
                 handleLabelPress={handleLabelPress}
                 minValue={minValue}
-                maxValue={(gramValue * 100)}
+                maxValue={gramValue * 100}
                 label={`Gorduras totais em ${gramValue} g / ${mlValue} ml`}
                 step={gramValue}
                 suffix=' g de gorduras totais'
                 labelLeft='MÉDIO: '
                 labelRight='ALTO: '
+                disabled={submitIsLoading}
             />
             <CustomSlider
                 name='sodium-slider'
@@ -206,9 +222,11 @@ const CutValuesForm = ({ formRef, handleSubmit, initialData, gramValue, mlValue,
                 suffix=' g de sal'
                 labelLeft='MÉDIO: '
                 labelRight='ALTO: '
+                disabled={submitIsLoading}
             />
             <View style={styles.checkboxContainer}>
                 <CheckBox
+                    disabled={submitIsLoading}
                     value={check}
                     onChange={() => {
                         setCheck((old) => !old);
@@ -229,6 +247,7 @@ const CutValuesForm = ({ formRef, handleSubmit, initialData, gramValue, mlValue,
                         suffix=' g de gorduras trans'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
+                        disabled={submitIsLoading}
                     />
                     <CustomSlider
                         name='fat-saturated-slider'
@@ -240,14 +259,19 @@ const CutValuesForm = ({ formRef, handleSubmit, initialData, gramValue, mlValue,
                         suffix=' g de gorduras saturadas'
                         labelLeft='MÉDIO: '
                         labelRight='ALTO: '
+                        disabled={submitIsLoading}
                     />
                 </>
             )}
-            <CustomButton
-                title={submitLabel}
-                onPress={() => formRef.current.submitForm()}
-                style={{ width: '100%' }}
-            />
+            {submitIsLoading ? (
+                <LoadingCircle />
+            ) : (
+                <CustomButton
+                    title={submitLabel}
+                    onPress={() => formRef.current.submitForm()}
+                    style={{ width: '100%' }}
+                />
+            )}
         </Form>
     );
 };

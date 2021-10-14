@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Form } from '@unform/mobile';
 
@@ -6,10 +6,13 @@ import Input from 'components/Input';
 import CustomButton from 'components/CustomButton';
 import sharedStyles from 'shared/sharedStyles';
 import { useAuth } from 'hooks/useAuth';
+import LoadingCircle from 'components/LoadingCircle';
 
 const Login = ({ navigation }) => {
     const formRef = useRef(null);
     const { signIn } = useAuth();
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
@@ -23,6 +26,7 @@ const Login = ({ navigation }) => {
         if (Object.keys(errorList).length) {
             formRef.current.setErrors(errorList);
         } else {
+            setSubmitIsLoading(true);
             signIn(data.username, data.password)
                 .then(({ usuario }) => {
                     if (usuario.nivel == 0) {
@@ -39,7 +43,7 @@ const Login = ({ navigation }) => {
                             });
                         }
                     }
-                    console.error({ err });
+                    setSubmitIsLoading(false);
                 });
         }
     };
@@ -56,6 +60,7 @@ const Login = ({ navigation }) => {
                         name='username'
                         label='Nome de usuário'
                         placeholder='Nome de usuário'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
                     <Input
@@ -63,14 +68,20 @@ const Login = ({ navigation }) => {
                         label='Senha'
                         placeholder='Senha'
                         type='password'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
+                    {submitIsLoading ? (
+                        <LoadingCircle />
+                    ) : (
+                        <CustomButton
+                            title='Entrar'
+                            style={{ marginBottom: 8 }}
+                            onPress={() => formRef.current.submitForm()}
+                        />
+                    )}
                     <CustomButton
-                        title='Entrar'
-                        style={{ marginBottom: 8 }}
-                        onPress={() => formRef.current.submitForm()}
-                    />
-                    <CustomButton
+                        disabled={submitIsLoading}
                         title='Criar uma conta'
                         onPress={() => navigation.navigate('CreateAccount')}
                     />

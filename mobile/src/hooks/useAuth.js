@@ -7,9 +7,10 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import api from 'services/api';
+import api, { uninterceptedApi } from 'services/api';
 import { StackActions } from '@react-navigation/native';
 import { Perfil } from 'model/Perfil';
+import ShowToast from 'utils/ShowToast';
 
 const AuthContext = createContext({});
 
@@ -42,6 +43,7 @@ const AuthProvider = ({ children, navRef }) => {
                     `[AuthHook] User ${parsedUser.nome} is authenticated`
                 );
                 api.defaults.headers.authorization = `Bearer ${token}`;
+                uninterceptedApi.defaults.headers.authorization = `Bearer ${token}`;
 
                 setData({
                     token,
@@ -66,11 +68,22 @@ const AuthProvider = ({ children, navRef }) => {
     useEffect(() => {
         if (data.token) {
             console.log('[AuthHook] Checking Session with available token');
-            api.get('/sessao').catch(() => {
-                console.log('[AuthHook] Session expired');
+            uninterceptedApi.get('/sessao').catch((err) => {
+                if(err.response) {
+                    if(err.response.status === 401) {
+                        console.log('[AuthHook] Session expired');
+                        ShowToast('Sessão expirada.');
+                        signOut();
+                    } else {
+                        console.log('[AuthHook] An unexpected error happened');
+                        console.log(err.response.data);
+                    }
+                } else {
+                    console.log('[AuthHook] Server has no response');
+                }
             });
         }
-    }, [data.token, signOut]);
+    }, [data.token]);
 
     const signIn = useCallback(async (username, password) => {
         console.log('[AuthHook] Signing in');
@@ -90,6 +103,7 @@ const AuthProvider = ({ children, navRef }) => {
         await AsyncStorage.setItem(profileAddr, JSON.stringify(perfil));
 
         api.defaults.headers.authorization = `Bearer ${token}`;
+        uninterceptedApi.defaults.headers.authorization = `Bearer ${token}`;
 
         const perfilInstanciado = perfil ? new Perfil(perfil) : undefined;
 
@@ -104,7 +118,8 @@ const AuthProvider = ({ children, navRef }) => {
         await AsyncStorage.removeItem(tokenAddr);
         await AsyncStorage.removeItem(userAddr);
         await AsyncStorage.removeItem(profileAddr);
-        api.defaults.headers.authorization = null;
+        delete api.defaults.headers.authorization;
+        delete uninterceptedApi.defaults.headers.authorization;
         setData({
             token: null,
             usuario: {

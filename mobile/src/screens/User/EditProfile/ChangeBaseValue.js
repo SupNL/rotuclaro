@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Header from 'components/Header';
 import { StyleSheet, View } from 'react-native';
 import { Form } from '@unform/mobile';
@@ -12,10 +12,13 @@ import { useAuth } from 'hooks/useAuth';
 import ShowToast from 'utils/ShowToast';
 import api from 'services/api';
 import { Perfil } from 'model/Perfil';
+import LoadingCircle from 'components/LoadingCircle';
 const ChangeBaseValue = ({ navigation }) => {
     const formRef = useRef(null);
 
     const { perfil, updateProfile } = useAuth();
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
@@ -35,6 +38,7 @@ const ChangeBaseValue = ({ navigation }) => {
 
         formRef.current.setErrors(errorList);
         if (Object.keys(errorList).length === 0) {
+            setSubmitIsLoading(true);
             const submitData = {
                 gramas: Number(data['base-value-gram']),
                 ml: Number(data['base-value-ml']),
@@ -48,8 +52,8 @@ const ChangeBaseValue = ({ navigation }) => {
                         navigation.goBack();
                     });
                 })
-                .catch((err) => {
-                    console.log({ err });
+                .catch(() => {
+                    setSubmitIsLoading(false);
                 });
         }
     };
@@ -90,6 +94,7 @@ const ChangeBaseValue = ({ navigation }) => {
                         placeholder='Exemplo: 100 g'
                         type='number'
                         suffix='g'
+                        editable={!submitIsLoading}
                         style={{
                             text: { textAlign: 'right' },
                             marginBottom: 8,
@@ -101,16 +106,21 @@ const ChangeBaseValue = ({ navigation }) => {
                         placeholder='Exemplo: 200 ml'
                         type='number'
                         suffix='ml'
+                        editable={!submitIsLoading}
                         style={{
                             text: { textAlign: 'right' },
                             marginBottom: 8,
                         }}
                     />
-                    <CustomButton
-                        title='Salvar'
-                        style={{ marginBottom: 8 }}
-                        onPress={() => formRef.current.submitForm()}
-                    />
+                    {submitIsLoading ? (
+                        <LoadingCircle />
+                    ) : (
+                        <CustomButton
+                            title='Salvar'
+                            style={{ marginBottom: 8 }}
+                            onPress={() => formRef.current.submitForm()}
+                        />
+                    )}
                     <CustomButton
                         title='Cancelar'
                         onPress={() => navigation.goBack()}

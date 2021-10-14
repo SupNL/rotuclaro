@@ -3,54 +3,52 @@ import { ActivityIndicator, FlatList, View } from 'react-native';
 
 import api from 'services/api';
 import ListItem from 'components/ListItem';
-import CustomButton from 'components/CustomButton';
 import axios from 'axios';
 import ShowToast from 'utils/ShowToast';
 import COLORS from 'shared/COLORS';
 import ConfirmDialog from 'components/ConfirmDialog';
-import { fetchProducts } from '../../../services/product/fetchProduct';
+
+import { fetchUsers } from 'services/users/fetchUser';
 import BigErrorMessage from 'components/BigErrorMessage';
 
-const ListProduct = ({ navigation }) => {
-    const [products, setProducts] = useState([]);
+const ListUser = ({ navigation }) => {
+    const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const source = axios.CancelToken.source();
 
-    const loadProducts = (tokenSource) => {
-        let lastName;
-        if (products.length > 0) lastName = products[products.length - 1].nome;
-        fetchProducts(tokenSource, lastName)
-            .then(([fetchedProducts, count]) => {
-                if (products.length + fetchedProducts.length >= count)
+    const loadUsers = () => {
+        let lastId;
+        if (users.length > 0) lastId = users[users.length - 1].id;
+        fetchUsers(source.token, lastId)
+            .then(([fetchedUsers, count]) => {
+                if (users.length + fetchedUsers.length >= count)
                     setIsLoading(false);
-                setProducts((old) => [...old, ...fetchedProducts]);
+                setUsers((old) => [...old, ...fetchedUsers]);
             })
             .catch((err) => {
-                setError(err);
+                setError({
+                    status: err?.response?.status,
+                });
             });
     };
 
-    const handleDelete = (componentId, componentName) => {
+    const handleDelete = (userId, userName) => {
         ConfirmDialog(
-            `Deseja realmente excluir "${componentName}"?`,
+            `Deseja realmente desativar o usuário "${userName}"?`,
             'Essa operação é irreversível',
             () =>
-                api.delete(`/produto/${componentId}`).then(() => {
-                    setProducts((old) =>
-                        old.filter((c) => c.id !== componentId)
-                    );
-                    ShowToast('Produto excluído');
+                api.delete(`/usuario/${userId}`).then(() => {
+                    setUsers((old) => old.filter((c) => c.id !== userId));
+                    ShowToast('Usuário desativado');
                 }),
             () => {}
         );
     };
 
     const handleEdit = (id) => {
-        navigation.navigate('EditProduct', {
-            productId: id,
-        });
+        navigation.navigate('EditUser', { userId: id });
     };
 
     useEffect(() => {
@@ -68,7 +66,6 @@ const ListProduct = ({ navigation }) => {
             <ListItem
                 id={item.id}
                 label={item.nome}
-                canDelete={item.permiteExclusao}
                 handleDelete={handleDelete}
                 handleEdit={handleEdit}
             />
@@ -77,31 +74,29 @@ const ListProduct = ({ navigation }) => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            loadProducts(source.token);
+            loadUsers();
         });
         return unsubscribe;
     }, [navigation]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('blur', () => {
-            setProducts([]);
-            setError(null);
+            setUsers([]);
             setIsLoading(true);
+            setError(null);
         });
         return unsubscribe;
     }, [navigation]);
 
     return (
         <View style={{ flex: 1 }}>
-            <CustomButton
-                title='Adicionar novo Produto'
-                onPress={() => navigation.navigate('CreateProduct')}
-            />
             {error ? (
-                <BigErrorMessage>Ocorreu um erro na consulta</BigErrorMessage>
+                <BigErrorMessage>
+                    Ocorreu um erro na consulta
+                </BigErrorMessage>
             ) : (
                 <FlatList
-                    data={products}
+                    data={users}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
                     ListFooterComponent={
@@ -114,7 +109,7 @@ const ListProduct = ({ navigation }) => {
                     }
                     onEndReachedThreshold={0.1}
                     onEndReached={() => {
-                        if (isLoading) loadProducts(source.token);
+                        if (isLoading) loadUsers();
                     }}
                 />
             )}
@@ -122,4 +117,4 @@ const ListProduct = ({ navigation }) => {
     );
 };
 
-export default ListProduct;
+export default ListUser;

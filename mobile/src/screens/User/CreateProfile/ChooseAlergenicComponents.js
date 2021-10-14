@@ -10,49 +10,56 @@ import ConfirmDialog from 'components/ConfirmDialog';
 import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
-import { useRef } from 'react';
 import SelectListedComponents from 'components/SelectListedComponents';
+import CustomModal from 'components/CustomModal';
+import LoadingCircle from 'components/LoadingCircle';
+import BigErrorMessage from 'components/BigErrorMessage';
+import { fetchAlergenicComponents } from 'services/alergenicComponents/fetchAlergenicComponent';
 
 const ChooseAlergenicComponents = ({ navigation, route }) => {
     const [components, setComponents] = useState([]);
     const [selectedComponents, setSelectedComponents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
+    const [submitError, setSubmitError] = useState(null);
 
     const source = axios.CancelToken.source();
-    const totalCount = useRef(-1);
-    const page = useRef(1);
 
-    const { updateProfile } = useAuth();
+    const { updateProfile, signOut } = useAuth();
 
     const routeParams = route.params;
 
-    const fetchComponents = () => {
-        let url = '/componente_alergenico';
-        if(components.length > 0) {
-            const length = components.length;
-            const lastName = components[length - 1].nome;
-            url += `?last_name=${lastName}`;
-        }
-        api.get(url, {
-            cancelToken: source.token,
-        })
-            .then((response) => {
-                const data = response.data;
-                totalCount.current = response.headers['x-total-count'];
-                setComponents((old) => {
-                    const newArray = [...old, ...data];
-                    if (newArray.length == totalCount.current)
-                        setIsLoading(false);
-                    return newArray;
-                });
-                page.current += 1;
+    const loadingModal = (
+        <CustomModal visible={submitIsLoading} onRequestClose={() => {}}>
+            {submitError ? (
+                <BigErrorMessage>
+                    Ocorreu um erro. Você será desautenticado.
+                </BigErrorMessage>
+            ) : (
+                <LoadingCircle />
+            )}
+        </CustomModal>
+    );
+
+    const loadComponents = () => {
+        let lastName;
+        if (components.length > 0)
+            lastName = components[components.length - 1].nome;
+        fetchAlergenicComponents(source.token, lastName)
+            .then(([fetchedComponents, count]) => {
+                if (components.length + fetchedComponents.length >= count)
+                    setIsLoading(false);
+                setComponents((old) => [...old, ...fetchedComponents]);
             })
             .catch((err) => {
-                console.log({ err });
+                setError(err);
             });
     };
 
     const handleSubmit = () => {
+        setSubmitIsLoading(true);
         const limitValues = routeParams.limitValues;
         const submitData = {
             gramas: routeParams.gramValue,
@@ -94,13 +101,15 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                 );
             })
             .catch((err) => {
-                if (err.response) {
-                    if (err.response.status == 409) {
-                        ShowToast('Perfil já existente.');
-                        navigation.navigate('ReadProductNav');
-                    }
+                if (err.response && err.response.status == 409) {
+                    ShowToast('Perfil já cadastrado.');
+                    navigation.navigate('ReadProductNav');
+                } else {
+                    setSubmitError(true);
+                    setTimeout(() => {
+                        signOut();
+                    }, 3000);
                 }
-                console.error({ err });
             });
     };
 
@@ -114,7 +123,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        fetchComponents();
+        loadComponents();
 
         return () => {
             try {
@@ -127,6 +136,7 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
 
     return (
         <View style={sharedStyles.defaultScreen}>
+            {loadingModal}
             <Header>Selecione os componentes alergênicos</Header>
             <CustomText style={styles.text}>
                 Caso você possua algum tipo de alergia, você precisa marcar os
@@ -137,13 +147,17 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
                 onPress={handleButtonConfirmation}
                 style={{ marginBottom: 8 }}
             />
-            <SelectListedComponents
-                components={components}
-                selectedComponents={selectedComponents}
-                setSelectedComponents={setSelectedComponents}
-                isLoading={isLoading}
-                handleFetch={fetchComponents}
-           />
+            {error ? (
+                <BigErrorMessage>Ocorreu um erro na consulta</BigErrorMessage>
+            ) : (
+                <SelectListedComponents
+                    components={components}
+                    selectedComponents={selectedComponents}
+                    setSelectedComponents={setSelectedComponents}
+                    isLoading={isLoading}
+                    handleFetch={loadComponents}
+                />
+            )}
         </View>
     );
 };

@@ -9,27 +9,29 @@ import { fetchOneUser } from 'services/users/fetchUser';
 import Header3 from 'components/Headers/Header3';
 import UserForm, { validateUserFormData } from 'screens/Admin/Users/components/UserForm';
 
-const EditModerator = ({ navigation, route }) => {
+const EditUser = ({ navigation, route }) => {
     const formRef = useRef(null);
     const scrollRef = useRef(null);
 
-    const moderatorId = route.params.moderatorId;
+    const userId = route.params.userId;
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [fetchedModerator, setFetchedModerator] = useState();
+    const [fetchedUser, setFetchedUser] = useState();
 
     const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const source = axios.CancelToken.source();
 
     useEffect(() => {
-        fetchOneUser(source.token, moderatorId, 100)
-            .then((product) => {
-                setFetchedModerator(product);
+        fetchOneUser(source.token, userId, 100)
+            .then((user) => {
+                setFetchedUser(user);
             })
             .catch((err) => {
-                setError(err);
+                setError({
+                    status: err?.response?.status,
+                });
             })
             .finally(() => setIsLoading(false));
 
@@ -58,9 +60,9 @@ const EditModerator = ({ navigation, route }) => {
                 login : data.login,
                 senha : data.senha ? data.senha : undefined,
             };
-            api.put(`/usuario/${moderatorId}`, submit_data)
+            api.put(`/usuario/${userId}`, submit_data)
                 .then(() => {
-                    ShowToast('Moderador alterado com sucesso!');
+                    ShowToast('Usuário alterado com sucesso!');
                     navigation.goBack();
                 })
                 .catch((err) => {
@@ -83,11 +85,11 @@ const EditModerator = ({ navigation, route }) => {
     return (
         <View style={sharedStyles.defaultScreen}>
             {error ? (
-                <Header3 style={sharedStyles.errorHeader}>Ocorreu um erro na consulta do moderador</Header3>
+                <Header3 style={sharedStyles.errorHeader}>Ocorreu um erro na consulta do produto</Header3>
             ) : isLoading ? (
                 <ActivityIndicator color={COLORS.secondary} />
             ) : (
-                fetchedModerator && (
+                fetchedUser && (
                     <ScrollView ref={scrollRef}>
                         <UserForm
                             formRef={formRef}
@@ -95,8 +97,8 @@ const EditModerator = ({ navigation, route }) => {
                             submitButtonLabel={'Alterar dados'}
                             submitIsLoading={submitIsLoading}
                             initialData={{
-                                nome : fetchedModerator.nome,
-                                login : fetchedModerator.login,
+                                nome : fetchedUser.nome,
+                                login : fetchedUser.login,
                             }}
                         />
                     </ScrollView>
@@ -106,4 +108,4 @@ const EditModerator = ({ navigation, route }) => {
     );
 };
 
-export default EditModerator;
+export default EditUser;

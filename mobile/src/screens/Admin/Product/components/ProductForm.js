@@ -10,6 +10,7 @@ import handleCameraPermission from 'utils/handleCameraPermission';
 import Input from 'components/Input';
 import SelectListedComponents from 'components/SelectListedComponents';
 import FormCheckbox from 'components/FormCheckbox';
+import LoadingCircle from 'components/LoadingCircle';
 
 export const formValidation = (data) => {
     const errorList = {};
@@ -61,10 +62,12 @@ const ProductForm = ({
     formRef,
     handleSubmit,
     submitButtonLabel,
+    submitIsLoading,
     initialData,
     initialComponents,
     selectedComponents,
-    setSelectedComponents
+    setSelectedComponents,
+    codeIsDisabled,
 }) => {
     const [components, setComponents] = useState();
     const [isComponentsLoading, setIsComponentsLoading] = useState(true);
@@ -199,10 +202,12 @@ const ProductForm = ({
                     label='Código'
                     type='number'
                     placeholder='Código do produto'
+                    editable={!submitIsLoading && !codeIsDisabled}
                     style={{ marginBottom: 4 }}
                 />
                 <CustomButton
                     title='Ler código'
+                    disabled={submitIsLoading}
                     onPress={() => handleModalVisible(true)}
                 />
             </View>
@@ -210,15 +215,24 @@ const ProductForm = ({
                 name='nome'
                 label='Nome do produto'
                 placeholder='Um nome descritivo para o produto'
+                editable={!submitIsLoading}
                 style={{ marginBottom: 8 }}
             />
-            <FormCheckbox name='liquido' label='Porção em ML' setExternalTracker={setIsLiquid} />
+            <FormCheckbox
+                name='liquido'
+                label='Porção em ML'
+                setExternalTracker={setIsLiquid}
+                disabled={submitIsLoading}
+            />
             <Input
                 name='gramasOuMlPorcao'
                 label={(isLiquid ? 'ML' : 'Gramas') + ' por porção'}
-                placeholder={(isLiquid ? 'ML' : 'Gramas') + ' por porção no rótulo'}
+                placeholder={
+                    (isLiquid ? 'ML' : 'Gramas') + ' por porção no rótulo'
+                }
                 type='number'
                 suffix={isLiquid ? 'ml' : 'g'}
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -229,6 +243,7 @@ const ProductForm = ({
                 placeholder='Kilocalorias na porção'
                 type='number'
                 suffix='Kcal'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -239,6 +254,7 @@ const ProductForm = ({
                 placeholder='Carboidratos na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -249,6 +265,7 @@ const ProductForm = ({
                 placeholder='Açúcares na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -259,6 +276,7 @@ const ProductForm = ({
                 placeholder='Gorduras totais na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -269,6 +287,7 @@ const ProductForm = ({
                 placeholder='Gorduras saturadas na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -279,6 +298,7 @@ const ProductForm = ({
                 placeholder='Gorduras trans na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -289,6 +309,7 @@ const ProductForm = ({
                 placeholder='Sódio na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -299,6 +320,7 @@ const ProductForm = ({
                 placeholder='Proteínas na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -309,6 +331,7 @@ const ProductForm = ({
                 placeholder='Fibras na porção'
                 type='number'
                 suffix='g'
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 8,
                 }}
@@ -318,6 +341,7 @@ const ProductForm = ({
                 label='Lista de ingredientes'
                 placeholder='Lista de ingredientes'
                 multiline={true}
+                editable={!submitIsLoading}
                 style={{
                     marginBottom: 16,
                 }}
@@ -325,6 +349,7 @@ const ProductForm = ({
 
             <CustomButton
                 title='Selecionar componentes alergênicos'
+                disabled={submitIsLoading}
                 style={{ marginBottom: 8 }}
                 onPress={() => {
                     if (!components) handleComponentsFetch();
@@ -332,11 +357,15 @@ const ProductForm = ({
                 }}
             />
 
-            <CustomButton
-                title={submitButtonLabel}
-                style={{ marginBottom: 8 }}
-                onPress={() => formRef.current.submitForm()}
-            />
+            {submitIsLoading ? (
+                <LoadingCircle />
+            ) : (
+                <CustomButton
+                    title={submitButtonLabel}
+                    style={{ marginBottom: 8 }}
+                    onPress={() => formRef.current.submitForm()}
+                />
+            )}
         </Form>
     );
 };

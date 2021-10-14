@@ -19,7 +19,10 @@ const ChangeCutValues = ({ navigation }) => {
 
     const { perfil, updateProfile } = useAuth();
 
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
+
     const handleSubmit = (data) => {
+        setSubmitIsLoading(true);
         const submitData = {
             limiteMedioKcal: data['kcal-slider'][0] / 100,
             limiteAltoKcal: data['kcal-slider'][1] / 100,
@@ -53,8 +56,8 @@ const ChangeCutValues = ({ navigation }) => {
                     navigation.goBack();
                 });
             })
-            .catch((err) => {
-                console.log({ err });
+            .catch(() => {
+                setSubmitIsLoading(false);
             });
     };
 
@@ -90,6 +93,7 @@ const ChangeCutValues = ({ navigation }) => {
                     ignoreExtra={perfil.ignoraExtra()}
                     gramValue={perfil.gramas}
                     mlValue={perfil.ml}
+                    submitIsLoading={submitIsLoading}
                     initialData={{
                         'kcal-slider': [
                             perfil.limiteMedioKcal * 100,

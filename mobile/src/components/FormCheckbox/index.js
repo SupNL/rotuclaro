@@ -5,7 +5,7 @@ import { useState } from 'react';
 import CheckBox from '@react-native-community/checkbox';
 import CustomText from 'components/CustomText';
 
-function FormCheckbox({ name, label, setExternalTracker }) {
+function FormCheckbox({ name, label, disabled, setExternalTracker }) {
     const checkboxRef = useRef(null);
     const { fieldName, registerField, defaultValue } = useField(name);
     const [currentValue, setCurrentValue] = useState(
@@ -48,6 +48,7 @@ function FormCheckbox({ name, label, setExternalTracker }) {
     return (
         <View style={styles.checkboxContainer}>
             <CheckBox
+                disabled={disabled}
                 style={{
                     marginLeft: 0
                 }}

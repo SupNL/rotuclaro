@@ -12,6 +12,7 @@ import SelectListedComponents from 'components/SelectListedComponents';
 import axios from 'axios';
 import { fetchAlergenicComponents } from 'services/alergenicComponents/fetchAlergenicComponent';
 import api from 'services/api';
+import LoadingCircle from 'components/LoadingCircle';
 const ChangeAlergenicComponent = ({ navigation }) => {
     const { perfil, updateProfile } = useAuth();
 
@@ -21,9 +22,12 @@ const ChangeAlergenicComponent = ({ navigation }) => {
     );
     const [isLoading, setIsLoading] = useState(true);
 
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
+
     const source = axios.CancelToken.source();
 
     const handleSubmit = () => {
+        setSubmitIsLoading(true);
         const submitData = {
             componentesAlergenicos: selectedComponents.map((c) => ({
                 id: c.id,
@@ -38,8 +42,8 @@ const ChangeAlergenicComponent = ({ navigation }) => {
                     navigation.goBack();
                 });
             })
-            .catch((err) => {
-                console.log({ err });
+            .catch(() => {
+                setSubmitIsLoading(false);
             });
     };
 
@@ -75,20 +79,25 @@ const ChangeAlergenicComponent = ({ navigation }) => {
                 Caso você possua algum tipo de alergia, você precisa marcar os
                 componentes abaixo que causam reações alérgicas.
             </CustomText>
-            <View style={{ flexDirection: 'row', marginBottom: 8 }}>
-                <CustomButton
-                    title='Cancelar'
-                    onPress={() => navigation.goBack()}
-                    style={{ marginRight: 16, flex: 1 }}
-                />
-                <CustomButton
-                    title='Salvar'
-                    onPress={handleSubmit}
-                    style={{ flex: 1 }}
-                />
-            </View>
+            {submitIsLoading ? (
+                <LoadingCircle />
+            ) : (
+                <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                    <CustomButton
+                        title='Cancelar'
+                        onPress={() => navigation.goBack()}
+                        style={{ marginRight: 16, flex: 1 }}
+                    />
+                    <CustomButton
+                        title='Salvar'
+                        onPress={handleSubmit}
+                        style={{ flex: 1 }}
+                    />
+                </View>
+            )}
             <SelectListedComponents
                 components={components}
+                submitIsLoading={submitIsLoading}
                 selectedComponents={selectedComponents}
                 setSelectedComponents={setSelectedComponents}
                 isLoading={isLoading}

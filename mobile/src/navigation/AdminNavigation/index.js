@@ -11,6 +11,8 @@ import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
 import ProductNavigation from './ProductNavigation';
 import ModeratorNavigation from './ModeratorNavigation';
+import UserNavigation from './UserNavigation';
+import SuggestionNavigation from './SuggestionNavigation';
 
 const AdminNavigation = () => {
     const AdminDrawer = createDrawerNavigator();
@@ -57,6 +59,16 @@ const AdminNavigation = () => {
                 name='ModeratorScreenNav'
                 component={ModeratorNavigation}
                 options={{ title: 'Moderadores' }}
+            />
+            <AdminDrawer.Screen
+                name='UserNavigation'
+                component={UserNavigation}
+                options={{ title: 'Usuários' }}
+            />
+            <AdminDrawer.Screen
+                name='SuggestionNavigation'
+                component={SuggestionNavigation}
+                options={{ title: 'Sugestões' }}
             />
         </AdminDrawer.Navigator>
     );

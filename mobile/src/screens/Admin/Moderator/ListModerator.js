@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, View } from 'react-native';
 
 import api from 'services/api';
 import ListItem from 'components/ListItem';
@@ -10,7 +10,7 @@ import COLORS from 'shared/COLORS';
 import ConfirmDialog from 'components/ConfirmDialog';
 
 import { fetchModerators } from 'services/users/fetchModerator';
-import Header3 from 'components/Headers/Header3';
+import BigErrorMessage from 'components/BigErrorMessage';
 
 const ListModerator = ({ navigation }) => {
     const [moderators, setModerators] = useState([]);
@@ -30,9 +30,7 @@ const ListModerator = ({ navigation }) => {
                 setModerators((old) => [...old, ...fetchedModerators]);
             })
             .catch((err) => {
-                setError({
-                    status: err?.response?.status,
-                });
+                setError(err);
             });
     };
 
@@ -97,9 +95,7 @@ const ListModerator = ({ navigation }) => {
                 onPress={() => navigation.navigate('CreateModerator')}
             />
             {error ? (
-                <Header3 style={styles.errorHeader}>
-                    Ocorreu um erro na consulta
-                </Header3>
+                <BigErrorMessage>Ocorreu um erro na consulta</BigErrorMessage>
             ) : (
                 <FlatList
                     data={moderators}
@@ -122,12 +118,5 @@ const ListModerator = ({ navigation }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    errorHeader: {
-        textAlign: 'center',
-        marginTop: 8,
-    },
-});
 
 export default ListModerator;

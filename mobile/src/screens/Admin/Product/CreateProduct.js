@@ -11,6 +11,8 @@ const CreateProduct = ({ navigation }) => {
 
     const [selectedComponents, setSelectedComponents] = useState([]);
 
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
+
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
         const errorList = formValidation(data);
@@ -21,6 +23,7 @@ const CreateProduct = ({ navigation }) => {
                 animated: true,
             });
         } else {
+            setSubmitIsLoading(true);
             const submit_data = {
                 ...data,
                 componentesAlergenicos: selectedComponents.map((c) => {
@@ -43,8 +46,8 @@ const CreateProduct = ({ navigation }) => {
                                 codigo: 'Código já cadastrado.',
                             });
                         }
-                        console.log(err.response);
                     }
+                    setSubmitIsLoading(false);
                 });
         }
     };
@@ -57,6 +60,7 @@ const CreateProduct = ({ navigation }) => {
                     handleSubmit={handleSubmit}
                     selectedComponents={selectedComponents}
                     setSelectedComponents={setSelectedComponents}
+                    submitIsLoading={submitIsLoading}
                     submitButtonLabel={'Cadastrar produto'}
                 />
             </ScrollView>

@@ -1,18 +1,17 @@
 import CustomText from 'components/CustomText';
+import LoadingCircle from 'components/LoadingCircle';
 import SelectableComponent from 'components/SelectableComponent';
 import React from 'react';
-import { ActivityIndicator, FlatList } from 'react-native';
-import COLORS from 'shared/COLORS';
-
+import { FlatList } from 'react-native';
 const SelectListedComponents = ({
     components,
     selectedComponents,
     setSelectedComponents,
+    submitIsLoading,
     isLoading,
     handleFetch,
-    style
+    style,
 }) => {
-
     const onComponentPress = (componentId) => {
         const selectedIndex = selectedComponents.findIndex(
             (item) => item.id === componentId
@@ -36,6 +35,7 @@ const SelectListedComponents = ({
         return (
             <SelectableComponent
                 key={item.id}
+                disabled={submitIsLoading}
                 onPressAction={onComponentPress}
                 componentId={item.id}
                 componentName={item.nome}
@@ -52,17 +52,11 @@ const SelectListedComponents = ({
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderComponentItem}
             style={{ ...style }}
-            ListFooterComponent={
-                isLoading && (
-                    <ActivityIndicator
-                        color={COLORS.secondary}
-                        style={{ marginBottom: 8 }}
-                    />
-                )
-            }
+            ListFooterComponent={isLoading && <LoadingCircle />}
             onEndReached={() => {
                 if (isLoading) handleFetch();
             }}
+            onEndReachedThreshold={0.1}
             ListEmptyComponent={
                 !isLoading && (
                     <CustomText

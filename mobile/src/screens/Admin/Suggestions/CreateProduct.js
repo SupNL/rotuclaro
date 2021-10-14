@@ -3,17 +3,22 @@ import { ScrollView, View } from 'react-native';
 import sharedStyles from 'shared/sharedStyles';
 import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
-import UserForm, { validateUserFormData } from 'screens/Admin/Users/components/UserForm';
+import ProductForm, {
+    formValidation,
+} from 'screens/Admin/Product/components/ProductForm';
 
-const CreateModerator = ({ navigation }) => {
+const CreateProduct = ({ navigation, route }) => {
+    const productCode = route.params.productCode;
     const formRef = useRef(null);
     const scrollRef = useRef(null);
+
+    const [selectedComponents, setSelectedComponents] = useState([]);
 
     const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
-        const errorList = validateUserFormData(data, true);
+        const errorList = formValidation(data);
         if (Object.keys(errorList).length) {
             formRef.current.setErrors(errorList);
             scrollRef.current.scrollTo({
@@ -23,18 +28,14 @@ const CreateModerator = ({ navigation }) => {
         } else {
             setSubmitIsLoading(true);
             const submit_data = {
-                nome: data.nome,
-                login: data.login,
-                senha: data.senha,
-                nivel : 'moderador'
+                ...data,
+                componentesAlergenicos: selectedComponents.map((c) => {
+                    return { id: c.id };
+                }),
             };
-            api.post('/usuario', submit_data, {
-                headers: {
-                    idunico: '123123',
-                },
-            })
+            api.post('/produto', submit_data)
                 .then(() => {
-                    ShowToast('Moderador cadastrado com sucesso!');
+                    ShowToast('Produto cadastrado com sucesso!');
                     navigation.goBack();
                 })
                 .catch((err) => {
@@ -45,7 +46,7 @@ const CreateModerator = ({ navigation }) => {
                                 animated: true,
                             });
                             formRef.current.setErrors({
-                                login: 'Login em uso.',
+                                codigo: 'Código já cadastrado.',
                             });
                         }
                     }
@@ -57,15 +58,21 @@ const CreateModerator = ({ navigation }) => {
     return (
         <View style={sharedStyles.defaultScreen}>
             <ScrollView ref={scrollRef}>
-                <UserForm
+                <ProductForm
                     formRef={formRef}
                     handleSubmit={handleSubmit}
+                    selectedComponents={selectedComponents}
+                    setSelectedComponents={setSelectedComponents}
                     submitIsLoading={submitIsLoading}
-                    submitButtonLabel={'Cadastrar'}
+                    submitButtonLabel={'Cadastrar produto'}
+                    codeIsDisabled={true}
+                    initialData={{
+                        codigo: productCode,
+                    }}
                 />
             </ScrollView>
         </View>
     );
 };
 
-export default CreateModerator;
+export default CreateProduct;

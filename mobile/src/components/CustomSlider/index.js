@@ -16,6 +16,7 @@ function CustomSlider({
     labelLeft,
     labelRight,
     handleLabelPress,
+    disabled,
     ...rest
 }) {
     const sliderRef = useRef(null);
@@ -76,7 +77,7 @@ function CustomSlider({
     return (
         <View>
             {label && <Text style={{ fontWeight: 'bold' }}>{label}</Text>}
-            <TouchableOpacity activeOpacity={0.8} onPress={() => handleLabelPress(name, leftValue, rightValue)}>
+            <TouchableOpacity disabled={disabled} activeOpacity={0.8} onPress={() => handleLabelPress(name, leftValue, rightValue)}>
                 {labelLeft && (
                     <Text style={styles.warningText}>
                         {labelLeft + leftValue / 100}

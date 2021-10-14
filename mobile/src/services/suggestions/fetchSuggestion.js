@@ -1,10 +1,10 @@
 import api from '../api';
 
-const fetchAlergenicComponents = (tokenSource, lastName) => {
+const fetchSuggestions = (tokenSource, lastDate, lastCount) => {
     return new Promise((resolve, reject) => {
-        let url = '/componente_alergenico';
+        let url = '/sugestao';
 
-        if (lastName) url += `?last_name=${lastName}`;
+        if (lastDate && lastCount) url += `?last_date=${lastDate}&last_count=${lastCount}`;
 
         api.get(url, {
             cancelToken: tokenSource,
@@ -21,4 +21,5 @@ const fetchAlergenicComponents = (tokenSource, lastName) => {
     });
 };
 
-export { fetchAlergenicComponents };
+
+export { fetchSuggestions };

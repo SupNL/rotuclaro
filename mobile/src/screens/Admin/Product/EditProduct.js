@@ -5,9 +5,9 @@ import api from 'services/api';
 import ShowToast from 'utils/ShowToast';
 import axios from 'axios';
 import { fetchOneProduct } from 'services/product/fetchProduct';
-import Header2 from 'components/Headers/Header2';
 import COLORS from 'shared/COLORS';
 import ProductForm, { formValidation } from './components/ProductForm';
+import Header3 from 'components/Headers/Header3';
 
 const EditProduct = ({ navigation, route }) => {
     const formRef = useRef(null);
@@ -19,7 +19,9 @@ const EditProduct = ({ navigation, route }) => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [fetchedProduct, setFetchedProduct] = useState();
-    const [isError, setIsError] = useState();
+    const [error, setError] = useState();
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const productSource = axios.CancelToken.source();
 
@@ -30,11 +32,7 @@ const EditProduct = ({ navigation, route }) => {
                 setSelectedComponents(product.componentesAlergenicos);
             })
             .catch((err) => {
-                if (err.response) {
-                    setIsError(err.response.status);
-                } else {
-                    setIsError(-1);
-                }
+                setError(err);
             })
             .finally(() => setIsLoading(false));
 
@@ -57,11 +55,12 @@ const EditProduct = ({ navigation, route }) => {
                 animated: true,
             });
         } else {
+            setSubmitIsLoading(true);
             const submit_data = {
                 ...data,
-                componentesAlergenicos : selectedComponents.map(c => {
-                    return { id : c.id };
-                })
+                componentesAlergenicos: selectedComponents.map((c) => {
+                    return { id: c.id };
+                }),
             };
             api.put(`/produto/${productId}`, submit_data)
                 .then(() => {
@@ -80,17 +79,17 @@ const EditProduct = ({ navigation, route }) => {
                             });
                         }
                     }
-                    console.log({ err });
+                    setSubmitIsLoading(false);
                 });
         }
     };
 
     return (
         <View style={sharedStyles.defaultScreen}>
-            {isLoading ? (
+            {error ? (
+                <Header3 style={sharedStyles.errorHeader}>Ocorreu um erro na consulta do produto</Header3>
+            ) : isLoading ? (
                 <ActivityIndicator color={COLORS.secondary} />
-            ) : isError ? (
-                <Header2>Ocorreu um erro na consulta do produto</Header2>
             ) : (
                 fetchedProduct && (
                     <ScrollView ref={scrollRef}>
@@ -98,9 +97,12 @@ const EditProduct = ({ navigation, route }) => {
                             formRef={formRef}
                             handleSubmit={handleSubmit}
                             submitButtonLabel={'Alterar produto'}
-                            initialComponents={fetchedProduct.componentesAlergenicos}
+                            initialComponents={
+                                fetchedProduct.componentesAlergenicos
+                            }
                             selectedComponents={selectedComponents}
                             setSelectedComponents={setSelectedComponents}
+                            submitIsLoading={submitIsLoading}
                             initialData={{
                                 codigo: fetchedProduct.codigo,
                                 nome: fetchedProduct.nome,

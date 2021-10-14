@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Form } from '@unform/mobile';
 
@@ -8,10 +8,13 @@ import sharedStyles from 'shared/sharedStyles';
 import { useAuth } from 'hooks/useAuth';
 import api from 'services/api';
 import getUniqueId from 'utils/getUniqueId';
+import LoadingCircle from 'components/LoadingCircle';
 
 const CreateAccount = ({ navigation }) => {
     const formRef = useRef(null);
     const { signIn } = useAuth();
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const handleSubmit = (data) => {
         formRef.current.setErrors({});
@@ -42,6 +45,7 @@ const CreateAccount = ({ navigation }) => {
         if (Object.keys(errorList).length) {
             formRef.current.setErrors(errorList);
         } else {
+            setSubmitIsLoading(true);
             const submit_data = {
                 nome: data.name,
                 login: data.username,
@@ -54,10 +58,9 @@ const CreateAccount = ({ navigation }) => {
                     },
                 })
                     .then(() => {
-                        signIn(data.username, data.password)
-                            .then(() => {
-                                navigation.replace('UserNav');
-                            });
+                        signIn(data.username, data.password).then(() => {
+                            navigation.replace('UserNav');
+                        });
                     })
                     .catch((err) => {
                         if (err.response) {
@@ -67,7 +70,7 @@ const CreateAccount = ({ navigation }) => {
                                 });
                             }
                         }
-                        console.error({ err });
+                        submitIsLoading(false);
                     });
             });
         }
@@ -85,12 +88,14 @@ const CreateAccount = ({ navigation }) => {
                         name='name'
                         label='Seu nome'
                         placeholder='Informe seu nome'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
                     <Input
                         name='username'
                         label='Nome de usuário'
                         placeholder='Informe um login'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
                     <Input
@@ -98,6 +103,7 @@ const CreateAccount = ({ navigation }) => {
                         label='Senha'
                         placeholder='Informe a senha'
                         type='password'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
                     <Input
@@ -105,13 +111,18 @@ const CreateAccount = ({ navigation }) => {
                         label='Confirme a senha'
                         placeholder='Informe a mesma senha'
                         type='password'
+                        editable={!submitIsLoading}
                         style={{ marginBottom: 8 }}
                     />
-                    <CustomButton
-                        title='Criar conta'
-                        style={{ marginBottom: 8 }}
-                        onPress={() => formRef.current.submitForm()}
-                    />
+                    {submitIsLoading ? (
+                        <LoadingCircle />
+                    ) : (
+                        <CustomButton
+                            title='Criar conta'
+                            style={{ marginBottom: 8 }}
+                            onPress={() => formRef.current.submitForm()}
+                        />
+                    )}
                     <CustomButton
                         title='Voltar'
                         onPress={() => navigation.goBack()}

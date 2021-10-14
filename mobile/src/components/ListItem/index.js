@@ -1,16 +1,18 @@
 import CustomText from 'components/CustomText';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Trash2, Edit } from 'react-native-feather';
+import { Trash2, Edit, Plus } from 'react-native-feather';
 import COLORS from 'shared/COLORS';
 
 const ListItem = ({
     id,
     label,
+    description,
     canDelete = true,
     handleDelete,
     canEdit = true,
     handleEdit,
+    useCreateInstead,
 }) => {
     return (
         <View style={styles.wrapper}>
@@ -20,6 +22,7 @@ const ListItem = ({
                 }}
             >
                 <CustomText style={styles.text}>{label}</CustomText>
+                {description && <CustomText style={styles.smallText}>{description}</CustomText>}
             </View>
 
             <View
@@ -38,7 +41,11 @@ const ListItem = ({
                             backgroundColor: COLORS.secondary,
                         }}
                     >
-                        <Edit stroke={COLORS.white} />
+                        {useCreateInstead ? (
+                            <Plus stroke={COLORS.white} />
+                        ) : (
+                            <Edit stroke={COLORS.white} />
+                        )}
                     </TouchableOpacity>
                 )}
                 {canDelete && (
@@ -77,6 +84,9 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 18,
+    },
+    smallText: {
+        fontSize: 14,
     },
 });
 

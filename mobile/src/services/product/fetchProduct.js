@@ -1,7 +1,7 @@
 import api from '../api';
 
 const fetchProducts = (tokenSource, lastName) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let url = '/produto';
 
         if (lastName) url += `?last_name=${lastName}`;
@@ -16,13 +16,13 @@ const fetchProducts = (tokenSource, lastName) => {
                 resolve([data, totalCount]);
             })
             .catch((err) => {
-                console.log({ err });
+                reject(err);
             });
     });
 };
 
 const fetchOneProduct = (tokenSource, id, uniqueId) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let url = `/produto/${id}`;
 
         api.get(url, {
@@ -36,7 +36,7 @@ const fetchOneProduct = (tokenSource, id, uniqueId) => {
                 resolve(data);
             })
             .catch((err) => {
-                console.log({ err });
+                reject(err);
             });
     });
 };

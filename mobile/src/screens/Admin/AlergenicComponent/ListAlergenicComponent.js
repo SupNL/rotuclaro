@@ -12,47 +12,40 @@ import CustomModal from 'components/CustomModal';
 import CustomText from 'components/CustomText';
 import Input from 'components/Input';
 import { Form } from '@unform/mobile';
+import { fetchAlergenicComponents } from 'services/alergenicComponents/fetchAlergenicComponent';
+import LoadingCircle from 'components/LoadingCircle';
+import BigErrorMessage from 'components/BigErrorMessage';
 
-const ListAlergenicComponent = () => {
+const ListAlergenicComponent = ({ navigation }) => {
     const formRef = useRef(null);
     const [components, setComponents] = useState([]);
     const [targetComponent, setTargetComponent] = useState({
         id: -1,
         name: '',
     });
+
+    const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
 
     const [editModalActive, setEditModalActive] = useState(false);
     const [createModalActive, setCreateModalActive] = useState(false);
 
     const source = axios.CancelToken.source();
-    const totalCount = useRef(-1);
-    const page = useRef(1);
 
-    const fetchComponents = (tokenSource) => {
-        let url = '/componente_alergenico';
-        if (components.length > 0) {
-            const length = components.length;
-            const lastName = components[length - 1].nome;
-            url += `?last_name=${lastName}`;
-        }
-        api.get(url, {
-            cancelToken: tokenSource,
-        })
-            .then((response) => {
-                const data = response.data;
-                totalCount.current = response.headers['x-total-count'];
-
-                setComponents((old) => {
-                    const newArray = [...old, ...data];
-                    if (newArray.length == totalCount.current)
-                        setIsLoading(false);
-                    return newArray;
-                });
-                page.current += 1;
+    const loadComponents = () => {
+        let lastName;
+        if (components.length > 0)
+            lastName = components[components.length - 1].nome;
+        fetchAlergenicComponents(source.token, lastName)
+            .then(([fetchedComponents, count]) => {
+                if (components.length + fetchedComponents.length >= count)
+                    setIsLoading(false);
+                setComponents((old) => [...old, ...fetchedComponents]);
             })
             .catch((err) => {
-                console.log({ err });
+                setError(err);
             });
     };
 
@@ -77,16 +70,20 @@ const ListAlergenicComponent = () => {
     };
 
     useEffect(() => {
-        fetchComponents(source.token, page);
+        const unsubscribe = navigation.addListener('focus', () => {
+            loadComponents();
+        });
+        return unsubscribe;
+    }, [navigation]);
 
-        return () => {
-            try {
-                source.cancel();
-            } catch (err) {
-                if (axios.isCancel(err)) console.err(err);
-            }
-        };
-    }, []);
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('blur', () => {
+            setComponents([]);
+            setIsLoading(true);
+            setError(null);
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     const EditModalScreen = (
         <CustomModal
@@ -108,24 +105,28 @@ const ListAlergenicComponent = () => {
                             name: 'Nome do componente obrigatório',
                         });
                     } else {
+                        setSubmitIsLoading(true);
                         api.put(
                             `/componente_alergenico/${targetComponent.id}`,
                             {
                                 nome: data.name,
                             }
-                        ).then(() => {
-                            setComponents((old) =>
-                                old.map((c) => {
-                                    c.nome =
-                                        c.id === targetComponent.id
-                                            ? data.name
-                                            : c.nome;
-                                    return c;
-                                })
-                            );
-                            ShowToast('Componente alterado');
-                            setEditModalActive(false);
-                        });
+                        )
+                            .then(() => {
+                                setComponents((old) =>
+                                    old.map((c) => {
+                                        c.nome =
+                                            c.id === targetComponent.id
+                                                ? data.name
+                                                : c.nome;
+                                        return c;
+                                    })
+                                );
+                                ShowToast('Componente alterado');
+                                setEditModalActive(false);
+                            })
+                            .catch(() => {})
+                            .finally(() => setSubmitIsLoading(false));
                     }
                 }}
             >
@@ -134,12 +135,17 @@ const ListAlergenicComponent = () => {
                     label='Nome do componente'
                     placeholder='Nome do componente'
                     style={{ marginBottom: 8 }}
+                    editable={!submitIsLoading}
                 />
-                <CustomButton
-                    title='Atualizar'
-                    style={{ marginBottom: 8 }}
-                    onPress={() => formRef.current.submitForm()}
-                />
+                {submitIsLoading ? (
+                    <LoadingCircle />
+                ) : (
+                    <CustomButton
+                        title='Atualizar'
+                        style={{ marginBottom: 8 }}
+                        onPress={() => formRef.current.submitForm()}
+                    />
+                )}
                 <CustomButton
                     title='Cancelar'
                     onPress={() => setEditModalActive(false)}
@@ -165,21 +171,17 @@ const ListAlergenicComponent = () => {
                             name: 'Nome do componente obrigatório',
                         });
                     } else {
-                        api.post(
-                            '/componente_alergenico',
-                            {
-                                nome: data.name,
-                            }
-                        ).then((res) => {
-                            setComponents((old) =>
-                                [
-                                    res.data,
-                                    ...old
-                                ]
-                            );
-                            ShowToast('Componente criado');
-                            setCreateModalActive(false);
-                        });
+                        setSubmitIsLoading(true);
+                        api.post('/componente_alergenico', {
+                            nome: data.name,
+                        })
+                            .then((res) => {
+                                setComponents((old) => [res.data, ...old]);
+                                ShowToast('Componente criado');
+                                setCreateModalActive(false);
+                            })
+                            .catch(() => {})
+                            .finally(() => setSubmitIsLoading(false));
                     }
                 }}
             >
@@ -188,12 +190,17 @@ const ListAlergenicComponent = () => {
                     label='Nome do componente'
                     placeholder='Nome do componente'
                     style={{ marginBottom: 8 }}
+                    editable={!submitIsLoading}
                 />
-                <CustomButton
-                    title='Cadastrar'
-                    style={{ marginBottom: 8 }}
-                    onPress={() => formRef.current.submitForm()}
-                />
+                {submitIsLoading ? (
+                    <LoadingCircle />
+                ) : (
+                    <CustomButton
+                        title='Cadastrar'
+                        style={{ marginBottom: 8 }}
+                        onPress={() => formRef.current.submitForm()}
+                    />
+                )}
                 <CustomButton
                     title='Cancelar'
                     onPress={() => setCreateModalActive(false)}
@@ -218,24 +225,31 @@ const ListAlergenicComponent = () => {
         <View style={{ flex: 1 }}>
             {CreateModalScreen}
             {EditModalScreen}
-            <CustomButton title='Adicionar novo Componente Alergênico' onPress={() => setCreateModalActive(true)} />
-            <FlatList
-                data={components}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id.toString()}
-                ListFooterComponent={
-                    isLoading && (
-                        <ActivityIndicator
-                            style={{ marginVertical: 8 }}
-                            color={COLORS.secondary}
-                        />
-                    )
-                }
-                onEndReachedThreshold={0.1}
-                onEndReached={() => {
-                    if (isLoading) fetchComponents(source.token);
-                }}
+            <CustomButton
+                title='Adicionar novo Componente Alergênico'
+                onPress={() => setCreateModalActive(true)}
             />
+            {error ? (
+                <BigErrorMessage>Ocorreu um erro na consulta</BigErrorMessage>
+            ) : (
+                <FlatList
+                    data={components}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    ListFooterComponent={
+                        isLoading && (
+                            <ActivityIndicator
+                                style={{ marginVertical: 8 }}
+                                color={COLORS.secondary}
+                            />
+                        )
+                    }
+                    onEndReachedThreshold={0.1}
+                    onEndReached={() => {
+                        if (isLoading) loadComponents(source.token);
+                    }}
+                />
+            )}
         </View>
     );
 };

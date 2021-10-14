@@ -20,5 +20,5 @@ export default StyleSheet.create({
     scrollAlign: {
         flexGrow: 1,
         justifyContent: 'center',
-    }
+    },
 });

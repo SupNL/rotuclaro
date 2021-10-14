@@ -13,7 +13,7 @@ import api from 'services/api';
 import ErrorInterceptor from 'utils/ErrorInterceptor';
 
 const Navigator = () => {
-    const { usuario } = useAuth();
+    const { usuario, signOut } = useAuth();
     const Stack = createStackNavigator();
     const [initialRoute, setInitialRoute] = useState(null);
 

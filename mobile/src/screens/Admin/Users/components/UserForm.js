@@ -3,8 +3,9 @@ import { Form } from '@unform/mobile';
 import { StyleSheet } from 'react-native';
 import CustomButton from 'components/CustomButton';
 import Input from 'components/Input';
+import LoadingCircle from 'components/LoadingCircle';
 
-export const formValidation = (data, requirePassword) => {
+export const validateUserFormData = (data, requirePassword) => {
     const errorList = {};
     const reg = new RegExp('^[a-zA-Z0-9@]*$');
 
@@ -46,10 +47,11 @@ export const formValidation = (data, requirePassword) => {
     return errorList;
 };
 
-const ModeratorForm = ({
+const UserForm = ({
     formRef,
     handleSubmit,
     submitButtonLabel,
+    submitIsLoading,
     initialData,
 }) => {
     return (
@@ -63,12 +65,14 @@ const ModeratorForm = ({
                 name='nome'
                 label='Nome'
                 placeholder='Nome do moderador'
+                editable={!submitIsLoading}
                 style={{ marginBottom: 4 }}
             />
             <Input
                 name='login'
                 label='Nome de usuário'
                 placeholder='Login do moderador'
+                editable={!submitIsLoading}
                 style={{ marginBottom: 8 }}
             />
             <Input
@@ -76,6 +80,7 @@ const ModeratorForm = ({
                 label='Senha'
                 placeholder='Informe a senha'
                 type='password'
+                editable={!submitIsLoading}
                 style={{ marginBottom: 8 }}
             />
             <Input
@@ -83,13 +88,18 @@ const ModeratorForm = ({
                 label='Confirme a senha'
                 placeholder='Informe a mesma senha'
                 type='password'
+                editable={!submitIsLoading}
                 style={{ marginBottom: 8 }}
             />
-            <CustomButton
-                title={submitButtonLabel}
-                style={{ marginBottom: 8 }}
-                onPress={() => formRef.current.submitForm()}
-            />
+            {submitIsLoading ? (
+                <LoadingCircle />
+            ) : (
+                <CustomButton
+                    title={submitButtonLabel}
+                    style={{ marginBottom: 8 }}
+                    onPress={() => formRef.current.submitForm()}
+                />
+            )}
         </Form>
     );
 };
@@ -102,4 +112,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ModeratorForm;
+export default UserForm;

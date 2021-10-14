@@ -3,7 +3,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import COLORS from 'shared/COLORS';
 
-const SelectableComponent = ({ componentId, componentName, isSelected, onPressAction }) => {
+const SelectableComponent = ({ componentId, componentName, isSelected, onPressAction, submitIsLoading }) => {
 
     const onSelect = () => {
         onPressAction(componentId);
@@ -11,6 +11,7 @@ const SelectableComponent = ({ componentId, componentName, isSelected, onPressAc
 
     return (
         <TouchableOpacity
+            disabled={submitIsLoading}
             style={isSelected ? {...styles.wrapper, ...styles.selected} : styles.wrapper}
             activeOpacity={0.6}
             onPress={onSelect}

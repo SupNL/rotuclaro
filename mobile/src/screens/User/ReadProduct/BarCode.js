@@ -11,29 +11,35 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import CustomButton from 'components/CustomButton';
 import CustomModal from 'components/CustomModal';
 import CustomText from 'components/CustomText';
-import api from 'services/api';
+import api, { uninterceptedApi } from 'services/api';
 import getUniqueId from 'utils/getUniqueId';
 import ShowToast from 'utils/ShowToast';
 import { useAuth } from 'hooks/useAuth';
 import ProductAlert from 'components/ProductAlert';
 import handleCameraPermission from 'utils/handleCameraPermission';
+import LoadingCircle from 'components/LoadingCircle';
+import BigErrorMessage from 'components/BigErrorMessage';
 
 const BarCode = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
 
-    const [visibleAlertModal, setVisibleAlertModal] = useState(false);
-    const [visibleNotFoundModal, setVisibleNotFoundModal] = useState(false);
-    const [visibleRequisitionsModal, setVisibleRequisitionsModal] =
-        useState(false);
-
+    const [productModalVisible, setProductModalVisible] = useState(false);
+    const [submitIsLoading, setSubmitIsLoading] = useState(false);
+    const [suggestionIsLoading, setSuggestionIsLoading] = useState(false);
     const [product, setProduct] = useState();
+    const [error, setError] = useState(null);
     const [alert, setAlert] = useState({});
 
-    const { perfil } = useAuth();
+    const [code, setCode] = useState(null);
+
+    const { perfil, signOut } = useAuth();
 
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true);
+        setProductModalVisible(true);
+        setSubmitIsLoading(true);
+        setCode(data);
         getUniqueId().then((idunico) => {
             api.get(`/produto/${data}`, {
                 headers: {
@@ -42,27 +48,25 @@ const BarCode = ({ navigation }) => {
             })
                 .then((res) => {
                     setProduct(res.data);
-                    setVisibleAlertModal(true);
                     const avisos = perfil.informarRestricoes(res.data);
                     setAlert(avisos);
                 })
                 .catch((err) => {
+                    setProduct(null);
                     if (err.response) {
-                        if (err.response.status == 404) {
-                            setVisibleNotFoundModal(true);
-                        } else if (err.response.status == 429) {
-                            setVisibleRequisitionsModal(true);
-                        }
+                        setError(err.response);
+                    } else {
+                        setError(err);
                     }
-                });
+                })
+                .finally(() => setSubmitIsLoading(false));
         });
     };
-    
+
     useEffect(() => {
         if (!scanned) {
-            setVisibleAlertModal(false);
-            setVisibleNotFoundModal(false);
-            setVisibleRequisitionsModal(false);
+            setError(null);
+            setProductModalVisible(false);
         }
     }, [scanned]);
 
@@ -73,42 +77,112 @@ const BarCode = ({ navigation }) => {
         return unsubscribe;
     }, [navigation]);
 
-    const ProductNotFoundModalScreen = (
-        <CustomModal
-            visible={visibleNotFoundModal}
-            onRequestClose={() => {
-                setScanned(false);
-            }}
-        >
+    const UnknownErrorScreen = (
+        <>
+            <BigErrorMessage>Ocorreu um erro inesperado</BigErrorMessage>
+            <CustomButton
+                title='Ok'
+                onPress={() => setScanned(false)}
+                style={{ marginTop: 8 }}
+            />
+        </>
+    );
+
+    const ServerUnreachable = (
+        <>
+            <BigErrorMessage>
+                O servidor não está respondendo. Tente novamente mais tarde.
+            </BigErrorMessage>
+            <CustomButton
+                title='Ok'
+                onPress={() => setScanned(false)}
+                style={{ marginTop: 8 }}
+            />
+        </>
+    );
+
+    const RequisitionsScreen = (
+        <>
+            <CustomText>Aguarde um pouco antes de ler um produto</CustomText>
+            <CustomButton
+                title='Ok'
+                onPress={() => setScanned(false)}
+                style={{ marginTop: 8 }}
+            />
+        </>
+    );
+
+    const handleSuggestionSubmit = () => {
+        setSuggestionIsLoading(true);
+        getUniqueId().then((idunico) => {
+            uninterceptedApi
+                .post(`/sugestao/${code}`, {}, {
+                    headers: {
+                        idunico,
+                    },
+                })
+                .then(() => {
+                    ShowToast('Sugestão enviada.', ToastAndroid.TOP);
+                })
+                .catch((err) => {
+                    if (err.response) {
+                        if (err.response.status === 429) {
+                            ShowToast(
+                                'Você já enviou sugestão desse produto.',
+                                ToastAndroid.TOP
+                            );
+                        } else if (err.response.status === 401) {
+                            ShowToast('Sessão expirada.', ToastAndroid.TOP);
+                            signOut();
+                        } else {
+                            ShowToast(
+                                'Ocorreu um erro inesperado.',
+                                ToastAndroid.TOP
+                            );
+                        }
+                    } else {
+                        ShowToast(
+                            'Não foi possível entrar em contato com o servidor.',
+                            ToastAndroid.TOP
+                        );
+                    }
+                })
+                .finally(() => {
+                    setSuggestionIsLoading(false);
+                    setScanned(false);
+                });
+        });
+    };
+
+    const ProductNotFoundScreen = (
+        <>
             <CustomText>
                 O produto ainda não está cadastrado. Deseja solicitar o cadastro
                 deste produto?
             </CustomText>
-            <CustomButton
-                title='Solicitar cadastro'
-                onPress={() => {
-                    ShowToast('Enviada.', ToastAndroid.TOP);
-                    setScanned(false);
-                }}
-                style={{ marginTop: 8 }}
-            />
-            <CustomButton
-                title='Ler outro produto'
-                onPress={() => {
-                    setScanned(false);
-                }}
-                style={{ marginTop: 8 }}
-            />
-        </CustomModal>
+            {suggestionIsLoading ? (
+                <LoadingCircle />
+            ) : (
+                <>
+                    <CustomButton
+                        title='Solicitar cadastro'
+                        onPress={handleSuggestionSubmit}
+                        style={{ marginTop: 8 }}
+                    />
+                    <CustomButton
+                        title='Ler outro produto'
+                        onPress={() => {
+                            setScanned(false);
+                        }}
+                        style={{ marginTop: 8 }}
+                    />
+                </>
+            )}
+        </>
     );
 
-    const ProductAlertModalScreen = (
-        <CustomModal
-            visible={visibleAlertModal}
-            onRequestClose={() => {
-                setScanned(false);
-            }}
-        >
+    const ProductAlertScreen = (
+        <>
             {product && (
                 <>
                     <ScrollView>
@@ -123,7 +197,9 @@ const BarCode = ({ navigation }) => {
                             title='Ver detalhes'
                             onPress={() => {
                                 navigation.navigate('ProductDetails', {
-                                    alert, profile : perfil, product
+                                    alert,
+                                    profile: perfil,
+                                    product,
                                 });
                             }}
                             style={{ flex: 1 }}
@@ -145,39 +221,47 @@ const BarCode = ({ navigation }) => {
                     </View>
                 </>
             )}
-        </CustomModal>
+        </>
     );
 
-    const RequisitionsLimitModal = (
+    const ProductModal = (
         <CustomModal
-            visible={visibleRequisitionsModal}
-            onRequestClose={() => {
-                setScanned(false);
-            }}
+            visible={productModalVisible}
+            onRequestClose={() => setScanned(false)}
         >
-            <CustomText>Aguarde um pouco antes de ler um produto</CustomText>
-            <CustomButton
-                title='Ok'
-                onPress={() => {
-                    setScanned(false);
-                }}
-                style={{ marginTop: 8 }}
-            />
+            {submitIsLoading ? (
+                <LoadingCircle />
+            ) : error ? (
+                error.status == 404 ? (
+                    ProductNotFoundScreen
+                ) : error.status == 429 ? (
+                    RequisitionsScreen
+                ) : error.status ? (
+                    UnknownErrorScreen
+                ) : (
+                    ServerUnreachable
+                )
+            ) : (
+                ProductAlertScreen
+            )}
         </CustomModal>
     );
 
     useEffect(() => {
         BarCodeScanner.getPermissionsAsync().then((res) => {
-            handleCameraPermission(res, hasPermission, setHasPermission, navigation.goBack);
+            handleCameraPermission(
+                res,
+                hasPermission,
+                setHasPermission,
+                navigation.goBack
+            );
         });
     }, [hasPermission]);
 
     return (
         <View style={{ flex: 1, backgroundColor: '#000' }}>
             <StatusBar hidden={true} />
-            {ProductAlertModalScreen}
-            {ProductNotFoundModalScreen}
-            {RequisitionsLimitModal}
+            {ProductModal}
             {hasPermission && (
                 <BarCodeScanner
                     onBarCodeScanned={
