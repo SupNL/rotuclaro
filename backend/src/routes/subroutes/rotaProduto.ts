@@ -74,7 +74,7 @@ rotaProduto.get(
         try {
             const { codigo_ou_id } = req.params;
 
-            const produtos = await ControleProduto.findMany({
+            const [produtos] = await ControleProduto.findMany({
                 where: [
                     {
                         codigo: codigo_ou_id,
@@ -86,7 +86,7 @@ rotaProduto.get(
                 relations: ['componentesAlergenicos'],
             });
             if (produtos.length > 0) {
-                const produto = produtos[0][0];
+                const produto = produtos[0];
                 return res.status(200).json(produto);
             }
             return res.status(404).json({ message: 'Não encontrado' });
