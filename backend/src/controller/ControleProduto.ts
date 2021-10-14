@@ -1,24 +1,26 @@
-import { DeleteResult, FindManyOptions, FindOneOptions, getConnection } from 'typeorm';
+import {
+    DeleteResult,
+    FindManyOptions,
+    FindOneOptions,
+    getConnection,
+} from 'typeorm';
 import { Produto } from '../model/Produto';
+import ControleSugestao from './ControleSugestao';
 
 export default {
-    convertBody(
-        entityBody : Partial<Produto>
-    ) : Produto {
+    convertBody(entityBody: Partial<Produto>): Produto {
         const connection = getConnection();
         const repo = connection.getRepository(Produto);
         const produto = repo.create(entityBody);
         return produto;
     },
 
-    findMany(
-        findOptions?: FindManyOptions
-    ): Promise<[Produto[], number]> {
+    findMany(findOptions?: FindManyOptions): Promise<[Produto[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(Produto);
 
-            repo.count().then(totalCount => {
+            repo.count().then((totalCount) => {
                 repo.find(findOptions)
                     .then((produtos) => resolve([produtos, totalCount]))
                     .catch((err) => reject(err));
@@ -28,7 +30,7 @@ export default {
 
     findOne(
         id: number,
-        findOptions?: FindOneOptions
+        findOptions?: FindOneOptions<Produto>
     ): Promise<Produto> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
@@ -40,9 +42,7 @@ export default {
         });
     },
 
-    create(
-        produto: Produto
-    ): Promise<Produto> {
+    create(produto: Produto): Promise<Produto> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             connection
@@ -51,7 +51,9 @@ export default {
                     return await repo.save(produto);
                 })
                 .then((created) => {
-                    resolve(created);
+                    ControleSugestao.delete(created.codigo).then(() => {
+                        resolve(created);
+                    });
                 })
                 .catch((err) => {
                     reject(err);
@@ -59,10 +61,7 @@ export default {
         });
     },
 
-    edit(
-        id: number,
-        produto: Produto
-    ): Promise<Produto> {
+    edit(id: number, produto: Produto): Promise<Produto> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             connection
@@ -71,6 +70,11 @@ export default {
 
                     const old = await repo.findOne(id);
                     const merged = repo.merge(old, produto);
+
+                    if (produto.componentesAlergenicos)
+                        merged.componentesAlergenicos =
+                            produto.componentesAlergenicos;
+
                     return await repo.save(merged);
                 })
                 .then((editedProduto) => {

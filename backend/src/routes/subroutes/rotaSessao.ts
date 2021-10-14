@@ -19,44 +19,48 @@ rotaSessao.post(
     async (req, res) => {
         try {
             const { login, senha } = req.body;
-            const usuarios = await ControleUsuario.findMany({
+            const [usuarios] = await ControleUsuario.findMany({
                 where: {
                     login: login,
                 },
-                select: ['id', 'nome', 'senha', 'nivel', 'ativo'],
+                select: ['id', 'nome', 'senha', 'nivel', 'ativo', 'login'],
                 relations : ['perfil']
             });
 
-            const usuario = usuarios[0];
+            if(usuarios.length === 1) {
+                const usuario = usuarios[0];
 
-            if (!usuario) {
-                return res
-                    .status(401)
-                    .json({ message: 'Credenciais incorretos' });
-            }
-
-            const resultado = await compare(senha, usuario.senha);
-            delete usuario.senha;
-
-            if (resultado) {
-                if (usuario.ativo == false) {
+                if (!usuario) {
                     return res
-                        .status(403)
-                        .json({ message: 'Sua conta foi desativada' });
+                        .status(401)
+                        .json({ message: 'Credenciais incorretos' });
                 }
-                const token = jwt.sign(
-                    {
-                        id: usuario.id,
-                        nivel: usuario.nivel,
-                    },
-                    process.env.SERVER_SECRET,
-                    {
-                        expiresIn : '2 hours'
+    
+                const resultado = await compare(senha, usuario.senha);
+                delete usuario.senha;
+    
+                if (resultado) {
+                    if (usuario.ativo == false) {
+                        return res
+                            .status(403)
+                            .json({ message: 'Sua conta foi desativada' });
                     }
-                );
-                return res
-                    .status(200)
-                    .json({ message: 'Autenticado', token: token, usuario : usuario });
+                    const token = jwt.sign(
+                        {
+                            id: usuario.id,
+                            nivel: usuario.nivel,
+                            nome : usuario.nome,
+                            login : usuario.login
+                        },
+                        process.env.SERVER_SECRET,
+                        {
+                            expiresIn : '2 hours'
+                        }
+                    );
+                    return res
+                        .status(200)
+                        .json({ message: 'Autenticado', token: token, usuario : usuario });
+                }
             }
             return res.status(401).json({ message: 'Credenciais incorretas' });
         } catch (err) {

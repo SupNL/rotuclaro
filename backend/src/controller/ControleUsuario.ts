@@ -1,4 +1,4 @@
-import { FindManyOptions, FindOneOptions, getConnection } from 'typeorm';
+import { FindManyOptions, FindOneOptions, getConnection, ObjectLiteral } from 'typeorm';
 import { NivelUsuario, Usuario } from '../model/Usuario';
 
 export default {
@@ -18,22 +18,30 @@ export default {
             const connection = getConnection();
             const repo = connection.getRepository(Usuario);
 
-            let countWhere : FindManyOptions<Usuario>;
-            if(findOptions && findOptions.where && findOptions.where['nivel'] === NivelUsuario.MODERADOR) {
-                countWhere = {
-                    where : {
-                        nivel : NivelUsuario.MODERADOR
-                    }
+            let whereCountOptions = {
+                ...findOptions.where as ObjectLiteral
+            };
+
+            if (findOptions && findOptions.where && findOptions.where['nivel'] === NivelUsuario.ADMIN) {
+                whereCountOptions = {
+                    ...whereCountOptions,
+                    nivel : NivelUsuario.ADMIN
+                };
+            } else if (findOptions && findOptions.where && findOptions.where['nivel'] === NivelUsuario.MODERADOR) {
+                whereCountOptions = {
+                    ...whereCountOptions,
+                    nivel : NivelUsuario.MODERADOR
                 };
             } else {
-                countWhere = {
-                    where : {
-                        nivel : NivelUsuario.COMUM
-                    }
+                whereCountOptions = {
+                    ...whereCountOptions,
+                    nivel : NivelUsuario.COMUM
                 };
             }
 
-            repo.count(countWhere).then(totalCount => {
+            repo.count({
+                where : whereCountOptions
+            }).then(totalCount => {
                 repo.find(findOptions)
                     .then((usuarios) => resolve([usuarios, totalCount]))
                     .catch((err) => reject(err));

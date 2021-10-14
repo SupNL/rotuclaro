@@ -11,7 +11,7 @@ export function validateAuth(
     res: Response,
     next: NextFunction
 ): unknown {
-    if (!req.headers || !req.headers['authorization']) {
+    if (!req.headers || req.headers['authorization'] == null) {
         return next();
     }
 

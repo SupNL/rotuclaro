@@ -4,6 +4,7 @@ import rotaComponente from './subroutes/rotaComponente';
 import rotaPerfil from './subroutes/rotaPerfil';
 import rotaProduto from './subroutes/rotaProduto';
 import rotaSessao from './subroutes/rotaSessao';
+import rotaSugestao from './subroutes/rotaSugestao';
 import rotaUsuario from './subroutes/rotaUsuario';
 
 const routing = Router();
@@ -13,5 +14,6 @@ routing.use('/produto', requireAuth, rotaProduto);
 routing.use('/usuario', rotaUsuario);
 routing.use('/perfil', rotaPerfil);
 routing.use('/sessao', rotaSessao);
+routing.use('/sugestao', requireAuth, rotaSugestao);
 
 export default routing;
