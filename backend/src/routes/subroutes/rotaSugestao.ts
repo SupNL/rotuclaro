@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
-import { FindManyOptions, MoreThan, QueryFailedError } from 'typeorm';
+import { FindManyOptions, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
 import ControleSugestao from '../../controller/ControleSugestao';
 import { CodigoJaExisteError } from '../../errors/CodigoJaExisteError';
 import { expectAdminOrModerator } from '../../middleware/expectAdminOrModerator';
@@ -31,11 +31,18 @@ rotaSugestao.get('/', expectAdminOrModerator, async (req, res) => {
             options.take = 10;
         }
 
-        if (typeof req.query['last_code'] == 'string') {
-            where = {
-                ...where,
-                nome: MoreThan(req.query['last_code']),
-            };
+        if (typeof req.query['last_date'] == 'string' && typeof req.query['last_count'] == 'string') {
+            const stringDate = req.query['last_date'] as string;
+            const stringCount = req.query['last_count'] as string;
+            const lastCount = parseInt(stringCount);
+            if(!isNaN(lastCount)){
+                where = {
+                    ...where,
+                    dataPrimeiraSugestao: MoreThan(new Date(stringDate)),
+                    vezesSugeridas: LessThanOrEqual(lastCount)
+                };
+            }
+            
         }
 
         options.where = where;
