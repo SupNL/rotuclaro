@@ -29,17 +29,12 @@ export function logRequest(
             const { login } = decoded as jwtPayloadObject;
             message += `${login}`;
         } catch (err) {
-            message += 'com token inválido]';
+            message += 'com token inválido';
         }
     } else {
-        message += 'não autenticado]';
+        message += 'não autenticado';
     }
-
-    if(req.body) {
-        message += '\nBody: ';
-        message += JSON.stringify(req.body);
-    }
-    
+    message += '] ';
 
     console.log(message);
     return next();
