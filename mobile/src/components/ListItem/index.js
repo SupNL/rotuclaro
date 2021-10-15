@@ -27,11 +27,23 @@ const ListItem = ({
 
             <View
                 style={{
-                    flexDirection: 'row',
+                    flexDirection: 'row-reverse',
                     justifyContent: 'space-between',
                     flex: 4,
                 }}
             >
+                {canDelete && (
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => handleDelete(id, label)}
+                        style={{
+                            ...styles.touchable,
+                            backgroundColor: COLORS.error,
+                        }}
+                    >
+                        <Trash2 stroke={COLORS.white} />
+                    </TouchableOpacity>
+                )}
                 {canEdit && (
                     <TouchableOpacity
                         activeOpacity={0.6}
@@ -46,18 +58,6 @@ const ListItem = ({
                         ) : (
                             <Edit stroke={COLORS.white} />
                         )}
-                    </TouchableOpacity>
-                )}
-                {canDelete && (
-                    <TouchableOpacity
-                        activeOpacity={0.6}
-                        onPress={() => handleDelete(id, label)}
-                        style={{
-                            ...styles.touchable,
-                            backgroundColor: COLORS.error,
-                        }}
-                    >
-                        <Trash2 stroke={COLORS.white} />
                     </TouchableOpacity>
                 )}
             </View>

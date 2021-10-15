@@ -205,11 +205,13 @@ const ProductForm = ({
                     editable={!submitIsLoading && !codeIsDisabled}
                     style={{ marginBottom: 4 }}
                 />
-                <CustomButton
-                    title='Ler código'
-                    disabled={submitIsLoading}
-                    onPress={() => handleModalVisible(true)}
-                />
+                {!codeIsDisabled && (
+                    <CustomButton
+                        title='Ler código'
+                        disabled={submitIsLoading}
+                        onPress={() => handleModalVisible(true)}
+                    />
+                )}
             </View>
             <Input
                 name='nome'

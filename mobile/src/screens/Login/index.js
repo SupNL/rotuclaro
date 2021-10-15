@@ -31,6 +31,8 @@ const Login = ({ navigation }) => {
                 .then(({ usuario }) => {
                     if (usuario.nivel == 0) {
                         navigation.replace('AdminNav');
+                    } else if (usuario.nivel == 2) {
+                        navigation.replace('ModeratorNav');
                     } else {
                         navigation.replace('UserNav');
                     }

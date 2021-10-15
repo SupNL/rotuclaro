@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import api from 'services/api';
 import ErrorInterceptor from 'utils/ErrorInterceptor';
+import ModeratorNavigation from './ModeratorNavigation';
 
 const Navigator = () => {
     const { usuario, signOut } = useAuth();
@@ -24,6 +25,8 @@ const Navigator = () => {
         } else {
             if (usuario.nivel == 0) {
                 setInitialRoute('AdminNav');
+            } else if (usuario.nivel == 2) {
+                setInitialRoute('ModeratorNav');
             } else {
                 setInitialRoute('UserNav');
             }
@@ -40,6 +43,7 @@ const Navigator = () => {
             >
                 <Stack.Screen name='LoginNav' component={LoginNavigation} />
                 <Stack.Screen name='UserNav' component={UserNavigation} />
+                <Stack.Screen name='ModeratorNav' component={ModeratorNavigation} />
                 <Stack.Screen name='AdminNav' component={AdminNavigation} />
             </Stack.Navigator>
         );
