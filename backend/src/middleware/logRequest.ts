@@ -15,11 +15,11 @@ export function logRequest(
     let message = '';
 
     message += '\n';
-    message += new Date().toISOString() + '\n';
+    message += new Date().toISOString() + ' - ';
     message += req.method.toUpperCase() + ' ';
-    message += req.url + '\n';
-    message += 'IP: ' + req.ip + '\n';
-    message += 'User: ';
+    message += req.url + ' - ';
+    message += '[IP ' + req.ip + '] ';
+    message += '[User ';
 
     if(req.headers.authorization) {
         const { authorization } = req.headers;
@@ -29,10 +29,10 @@ export function logRequest(
             const { login } = decoded as jwtPayloadObject;
             message += `${login}`;
         } catch (err) {
-            message += 'com token inválido';
+            message += 'com token inválido]';
         }
     } else {
-        message += 'não autenticado';
+        message += 'não autenticado]';
     }
 
     if(req.body) {
