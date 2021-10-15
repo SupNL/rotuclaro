@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 
 export const handleQueryFailedError = (error : Error, _: Request, res: Response): Response => {
-    console.error(error);
     if(error instanceof QueryFailedError) { 
         // Chave duplicada
         if(parseInt(error['code']) == 23505) {
@@ -17,7 +16,6 @@ export const handleQueryFailedError = (error : Error, _: Request, res: Response)
         // violação de chave estrangeira (inexistente)
         if(parseInt(error['code']) == 23503) {
             const detail: string = error['detail'];
-            console.log(detail);
             
             const matchKey = detail.match(/.* \((?<key1>\w+)\)=\((?<key2>\w+)\).*/);
 
@@ -26,5 +24,6 @@ export const handleQueryFailedError = (error : Error, _: Request, res: Response)
             }
         }
     }
+    console.error(error);
     return res.status(500).json({ message: 'Erro de servidor' });
 };
