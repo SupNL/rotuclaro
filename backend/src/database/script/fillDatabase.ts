@@ -1,8 +1,14 @@
 import { createConnection } from 'typeorm';
 import ControleComponenteAlergenico from '../../controller/ControleComponenteAlergenico';
 import ControleProduto from '../../controller/ControleProduto';
+import ControleUsuario from '../../controller/ControleUsuario';
 import { ComponenteAlergenico } from '../../model/ComponenteAlergenico';
 import { Produto } from '../../model/Produto';
+import { Usuario } from '../../model/Usuario';
+
+const listaUsuariosComuns = [
+    new Usuario('Gustavo Patara', 'gpatara', '123321')
+];
 
 const listaComponentes = [
     // 0
@@ -90,7 +96,20 @@ const listaProdutos = [
     ),
 ];
 
-createConnection().then(() => {
+createConnection().then(async () => {
+    const usuariosComunsPromises = () => {
+        return listaUsuariosComuns.map((usuario) => {
+            return new Promise<void>((resolve) => {
+                console.log(
+                    `[SCRIPT BD] USUÁRIO COMUM - "${usuario.nome}"`
+                );
+                ControleUsuario.create(usuario).then(() => {
+                    resolve();
+                });
+            });
+        });
+    };
+
     const componentesPromises = () => {
         return listaComponentes.map((componente) => {
             return new Promise<void>((resolve) => {
@@ -117,9 +136,8 @@ createConnection().then(() => {
 
     console.log('[SCRIPT BD] FILLING DATABASE');
 
-    Promise.all(componentesPromises()).then(() => {
-        Promise.all(produtosPromises()).then(() => {
-            console.log('[SCRIPT BD] FINISHED');
-        });
-    });
+    await Promise.all(usuariosComunsPromises());
+    await Promise.all(componentesPromises());
+    await Promise.all(produtosPromises());
+    console.log('[SCRIPT BD] FINISHED');
 });

@@ -18,8 +18,10 @@ export enum NivelUsuario {
 
 @Entity({ name: 'usuario' })
 export class Usuario {
-    constructor(nome?: string) {
+    constructor(nome?: string, login?: string, senha?: string) {
         this.nome = nome;
+        this.login = login;
+        this.senha = senha;
     }
 
     @BeforeInsert()
