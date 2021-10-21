@@ -14,7 +14,6 @@ export function logRequest(
 ): unknown {
     let message = '';
 
-    message += '\n';
     message += new Date().toISOString() + ' - ';
     message += req.method.toUpperCase() + ' ';
     message += req.url + ' - ';
