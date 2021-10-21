@@ -1,13 +1,14 @@
 import api from '../api';
 
-const fetchProducts = (tokenSource, lastName) => {
+const fetchProducts = (tokenSource, lastName, name) => {
     return new Promise((resolve, reject) => {
-        let url = '/produto';
-
-        if (lastName) url += `?last_name=${lastName}`;
-
+        const url = '/produto';
         api.get(url, {
             cancelToken: tokenSource,
+            params : {
+                last_name : lastName,
+                nome : name,
+            }
         })
             .then((response) => {
                 const data = response.data;

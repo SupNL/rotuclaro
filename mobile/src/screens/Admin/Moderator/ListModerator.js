@@ -11,21 +11,25 @@ import ConfirmDialog from 'components/ConfirmDialog';
 
 import { fetchModerators } from 'services/users/fetchModerator';
 import BigErrorMessage from 'components/BigErrorMessage';
+import MenuAndSearch from 'components/MenuAndSearch';
+import SearchModal from 'components/SearchModal';
 
 const ListModerator = ({ navigation }) => {
     const [moderators, setModerators] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [visibleModal, setVisibleModal] = useState(false);
+    const [name, setName] = useState(null);
+    const [search, setSearch] = useState(false);
+
     const source = axios.CancelToken.source();
 
-    const loadModerators = () => {
-        let lastId;
-        if (moderators.length > 0)
-            lastId = moderators[moderators.length - 1].id;
-        fetchModerators(source.token, lastId)
+    const loadModerators = (lastId) => {
+        fetchModerators(source.token, lastId, name)
             .then(([fetchedModerators, count]) => {
-                if (moderators.length + fetchedModerators.length >= count)
+                const currentLength = moderators ? moderators.length : 0;
+                if (currentLength + fetchedModerators.length >= count)
                     setIsLoading(false);
                 setModerators((old) => [...old, ...fetchedModerators]);
             })
@@ -52,6 +56,14 @@ const ListModerator = ({ navigation }) => {
     };
 
     useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <MenuAndSearch
+                    navigation={navigation}
+                    onPress={() => setVisibleModal(true)}
+                />
+            ),
+        });
         return () => {
             try {
                 source.cancel();
@@ -83,13 +95,31 @@ const ListModerator = ({ navigation }) => {
         const unsubscribe = navigation.addListener('blur', () => {
             setModerators([]);
             setIsLoading(true);
+            setName(null);
             setError(null);
         });
         return unsubscribe;
     }, [navigation]);
 
+    useEffect(() => {
+        if (search) {
+            setModerators([]);
+            setIsLoading(true);
+            setError(null);
+            loadModerators();
+            setSearch(false);
+        }
+    }, [name, search]);
+
     return (
         <View style={{ flex: 1 }}>
+            <SearchModal
+                visible={visibleModal}
+                setVisible={setVisibleModal}
+                label='Nome do moderador'
+                setInfo={setName}
+                toggleSearch={setSearch}
+            />
             <CustomButton
                 title='Cadastrar novo moderador'
                 onPress={() => navigation.navigate('CreateModerator')}
@@ -111,7 +141,12 @@ const ListModerator = ({ navigation }) => {
                     }
                     onEndReachedThreshold={0.1}
                     onEndReached={() => {
-                        if (isLoading) loadModerators();
+                        if (isLoading)
+                            loadModerators(
+                                moderators.length > 0
+                                    ? moderators[moderators.length - 1].id
+                                    : null
+                            );
                     }}
                 />
             )}

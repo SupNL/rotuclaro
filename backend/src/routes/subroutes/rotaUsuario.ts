@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { NextFunction, Request, Response, Router } from 'express';
-import { FindManyOptions, LessThan, MoreThan } from 'typeorm';
+import { FindManyOptions, ILike, LessThan } from 'typeorm';
 import ControleUsuario from '../../controller/ControleUsuario';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { accountCreationLimiter } from '../../middleware/limitRequests';
@@ -79,6 +79,15 @@ rotaUsuario.get('/', requireAuth, expectAdmin, async (req, res) => {
             options.where = {
                 ...options.where,
                 id : LessThan(req.query['last_id'])
+            };
+        }
+
+        if (
+            typeof req.query['nome'] == 'string'
+        ) {
+            options.where = {
+                ...options.where,
+                nome : ILike('%' + req.query['nome'] + '%')
             };
         }
 

@@ -10,20 +10,25 @@ import ConfirmDialog from 'components/ConfirmDialog';
 
 import { fetchUsers } from 'services/users/fetchUser';
 import BigErrorMessage from 'components/BigErrorMessage';
+import SearchModal from 'components/SearchModal';
+import MenuAndSearch from 'components/MenuAndSearch';
 
 const ListUser = ({ navigation }) => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [visibleModal, setVisibleModal] = useState(false);
+    const [name, setName] = useState(null);
+    const [search, setSearch] = useState(false);
+
     const source = axios.CancelToken.source();
 
-    const loadUsers = () => {
-        let lastId;
-        if (users.length > 0) lastId = users[users.length - 1].id;
-        fetchUsers(source.token, lastId)
+    const loadUsers = (lastId) => {
+        fetchUsers(source.token, lastId, name)
             .then(([fetchedUsers, count]) => {
-                if (users.length + fetchedUsers.length >= count)
+                const currentLength = users ? users.length : 0;
+                if (currentLength + fetchedUsers.length >= count)
                     setIsLoading(false);
                 setUsers((old) => [...old, ...fetchedUsers]);
             })
@@ -52,6 +57,14 @@ const ListUser = ({ navigation }) => {
     };
 
     useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <MenuAndSearch
+                    navigation={navigation}
+                    onPress={() => setVisibleModal(true)}
+                />
+            ),
+        });
         return () => {
             try {
                 source.cancel();
@@ -83,17 +96,33 @@ const ListUser = ({ navigation }) => {
         const unsubscribe = navigation.addListener('blur', () => {
             setUsers([]);
             setIsLoading(true);
+            setName(null);
             setError(null);
         });
         return unsubscribe;
     }, [navigation]);
 
+    useEffect(() => {
+        if (search) {
+            setUsers([]);
+            setIsLoading(true);
+            setError(null);
+            loadUsers();
+            setSearch(false);
+        }
+    }, [name, search]);
+
     return (
         <View style={{ flex: 1 }}>
+            <SearchModal
+                visible={visibleModal}
+                setVisible={setVisibleModal}
+                label='Nome do moderador'
+                setInfo={setName}
+                toggleSearch={setSearch}
+            />
             {error ? (
-                <BigErrorMessage>
-                    Ocorreu um erro na consulta
-                </BigErrorMessage>
+                <BigErrorMessage>Ocorreu um erro na consulta</BigErrorMessage>
             ) : (
                 <FlatList
                     data={users}
@@ -109,7 +138,7 @@ const ListUser = ({ navigation }) => {
                     }
                     onEndReachedThreshold={0.1}
                     onEndReached={() => {
-                        if (isLoading) loadUsers();
+                        if (isLoading) loadUsers(users[users.length - 1].id);
                     }}
                 />
             )}

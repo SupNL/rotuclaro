@@ -1,13 +1,15 @@
 import api from '../api';
 
-const fetchUsers = (tokenSource, lastId) => {
+const fetchUsers = (tokenSource, lastId, name) => {
     return new Promise((resolve, reject) => {
         let url = '/usuario';
 
-        if (lastId) url += `?last_id=${lastId}`;
-
         api.get(url, {
             cancelToken: tokenSource,
+            params : {
+                last_id : lastId,
+                nome : name,
+            }
         })
             .then((response) => {
                 const data = response.data;

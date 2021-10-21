@@ -1,6 +1,6 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
-import { FindManyOptions, Like, MoreThan } from 'typeorm';
+import { FindManyOptions, ILike, MoreThan } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { expectAdminOrModerator } from '../../middleware/expectAdminOrModerator';
@@ -24,7 +24,7 @@ rotaProduto.get('/', expectAdminOrModerator, async (req, res) => {
         ) {
             where = {
                 ...where,
-                nome : Like('%' + req.query['nome'] + '%'),
+                nome : ILike('%' + req.query['nome'] + '%'),
             };
         }
 

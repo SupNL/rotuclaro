@@ -1,13 +1,15 @@
 import api from '../api';
 
-const fetchModerators = (tokenSource, lastId) => {
+const fetchModerators = (tokenSource, lastId, name) => {
     return new Promise((resolve, reject) => {
         let url = '/usuario?moderador=true';
 
-        if (lastId) url += `&last_id=${lastId}`;
-
         api.get(url, {
             cancelToken: tokenSource,
+            params : {
+                last_id : lastId,
+                nome : name,
+            }
         })
             .then((response) => {
                 const data = response.data;

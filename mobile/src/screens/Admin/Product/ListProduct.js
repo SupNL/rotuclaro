@@ -10,20 +10,25 @@ import COLORS from 'shared/COLORS';
 import ConfirmDialog from 'components/ConfirmDialog';
 import { fetchProducts } from '../../../services/product/fetchProduct';
 import BigErrorMessage from 'components/BigErrorMessage';
+import MenuAndSearch from 'components/MenuAndSearch';
+import SearchModal from 'components/SearchModal';
 
 const ListProduct = ({ navigation }) => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [visibleModal, setVisibleModal] = useState(false);
+    const [name, setName] = useState(null);
+    const [search, setSearch] = useState(false);
+
     const source = axios.CancelToken.source();
 
-    const loadProducts = (tokenSource) => {
-        let lastName;
-        if (products.length > 0) lastName = products[products.length - 1].nome;
-        fetchProducts(tokenSource, lastName)
+    const loadProducts = (lastName) => {
+        fetchProducts(source.token, lastName, name)
             .then(([fetchedProducts, count]) => {
-                if (products.length + fetchedProducts.length >= count)
+                const currentLength = products ? products.length : 0;
+                if (currentLength + fetchedProducts.length >= count)
                     setIsLoading(false);
                 setProducts((old) => [...old, ...fetchedProducts]);
             })
@@ -54,6 +59,14 @@ const ListProduct = ({ navigation }) => {
     };
 
     useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <MenuAndSearch
+                    navigation={navigation}
+                    onPress={() => setVisibleModal(true)}
+                />
+            ),
+        });
         return () => {
             try {
                 source.cancel();
@@ -77,7 +90,7 @@ const ListProduct = ({ navigation }) => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            loadProducts(source.token);
+            loadProducts();
         });
         return unsubscribe;
     }, [navigation]);
@@ -85,14 +98,32 @@ const ListProduct = ({ navigation }) => {
     useEffect(() => {
         const unsubscribe = navigation.addListener('blur', () => {
             setProducts([]);
+            setName(null);
             setError(null);
             setIsLoading(true);
         });
         return unsubscribe;
     }, [navigation]);
 
+    useEffect(() => {
+        if(search) {
+            setProducts([]);
+            setIsLoading(true);
+            setError(null);
+            loadProducts();
+            setSearch(false);
+        }
+    }, [name, search]);
+
     return (
         <View style={{ flex: 1 }}>
+            <SearchModal
+                visible={visibleModal}
+                setVisible={setVisibleModal}
+                label='Nome do produto'
+                setInfo={setName}
+                toggleSearch={setSearch}
+            />
             <CustomButton
                 title='Adicionar novo Produto'
                 onPress={() => navigation.navigate('CreateProduct')}
@@ -114,7 +145,13 @@ const ListProduct = ({ navigation }) => {
                     }
                     onEndReachedThreshold={0.1}
                     onEndReached={() => {
-                        if (isLoading) loadProducts(source.token);
+                        if (isLoading)
+                            loadProducts({
+                                lastName:
+                                    products.length > 0
+                                        ? products[products.length - 1].nome
+                                        : null,
+                            });
                     }}
                 />
             )}
