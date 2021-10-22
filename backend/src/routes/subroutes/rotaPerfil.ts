@@ -41,7 +41,6 @@ rotaPerfil.get('/', requireAuth, expectAdmin, async (req, res) => {
 
         return res.status(200).json(perfis);
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ message: 'Erro de servidor' });
     }
 });
@@ -71,7 +70,6 @@ rotaPerfil.get('/meu_perfil', requireAuth, async (req, res) => {
 
         return res.status(404).json({ message: 'Não encontrado' });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ message: 'Erro de servidor' });
     }
 });

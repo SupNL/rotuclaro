@@ -22,21 +22,78 @@ export default {
             const query = connection
                 .getRepository(ComponenteAlergenico)
                 .createQueryBuilder('ca')
-                .innerJoin('componentes_perfis', 'cp', 'ca.id = cp.id_componente')
-                .where('ca.id = :cId', { cId : comp.id });
+                .innerJoin(
+                    'componentes_perfis',
+                    'cp',
+                    'ca.id = cp.id_componente'
+                )
+                .where('ca.id = :cId', { cId: comp.id });
 
-            query.getCount().then(count => {
+            query.getCount().then((count) => {
                 count > 0 ? resolve(true) : resolve(false);
             });
         });
     },
 
-    findMany(findOptions?: FindManyOptions): Promise<[ComponenteAlergenico[], number]> {
+    async findMostAvoidedComponent(): Promise<{ componentName : string, count : number}> {
+        interface rawResult {
+            componente_nome : string;
+            count : string;
+        }
+
+        const connection = getConnection();
+        const queryBuilder = connection
+            .getRepository(ComponenteAlergenico)
+            .createQueryBuilder('componente');
+
+        const query = queryBuilder
+            .innerJoin(
+                'componentes_perfis',
+                'cp',
+                'cp.id_componente = componente.id'
+            )
+            .select('componente')
+            .addSelect('COUNT(*) as count')
+            .groupBy('componente.id')
+            .orderBy('count', 'DESC');
+
+        const raw = await query.getRawOne() as rawResult;
+
+        if(raw) {
+            return {
+                componentName : raw.componente_nome,
+                count : parseInt(raw.count)
+            };
+        } else {
+            return {
+                componentName : null,
+                count : 0
+            };
+        }
+        
+    },
+
+    // async findMostAvoidedComponent() : Promise<{ component : ComponenteAlergenico, count : number}> {
+    //     const connection = getConnection();
+    //     const queryBuilder = connection.getRepository(ComponenteAlergenico).createQueryBuilder('componente');
+
+    //     const component = queryBuilder.leftJoin('componentes_perfis', 'cp', 'cp.id_componente = componente.id').select('componente').addSelect('COUNT()').groupBy('')
+
+    //     repo.count().then(totalCount => {
+    //         repo.find()
+    //             .then((componentes) => resolve({ component : componentes[0], count : totalCount}))
+    //             .catch((err) => reject(err));
+    //     });
+    // },
+
+    findMany(
+        findOptions?: FindManyOptions
+    ): Promise<[ComponenteAlergenico[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
             const repo = connection.getRepository(ComponenteAlergenico);
 
-            repo.count().then(totalCount => {
+            repo.count().then((totalCount) => {
                 repo.find(findOptions)
                     .then((componentes) => resolve([componentes, totalCount]))
                     .catch((err) => reject(err));

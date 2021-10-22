@@ -49,7 +49,6 @@ rotaComponente.get('/', async (req, res) => {
         });
         
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ message: 'Erro de servidor' });
     }
 });
@@ -104,7 +103,6 @@ rotaComponente.put(
 
             return res.status(200).json(componenteAlergenico);
         } catch (err) {
-            console.error(err);
             return res.status(500).json({ message: 'Erro de servidor' });
         }
     }
@@ -131,7 +129,6 @@ rotaComponente.delete(
 
             return res.status(204).send();
         } catch (err) {
-            console.error(err);
             return res.status(500).json({ message: 'Erro de servidor' });
         }
     }

@@ -2,9 +2,12 @@ import { celebrate, Joi, Segments } from 'celebrate';
 import { Router } from 'express';
 import { FindManyOptions, ILike, MoreThan } from 'typeorm';
 import ControleProduto from '../../controller/ControleProduto';
+import ControleRegistroConsulta from '../../controller/ControleRegistroConsulta';
 import { expectAdmin } from '../../middleware/expectAdmin';
 import { expectAdminOrModerator } from '../../middleware/expectAdminOrModerator';
 import { produtoLimiter } from '../../middleware/limitRequests';
+import { RegistroConsulta } from '../../model/RegistroConsulta';
+import { NivelUsuario } from '../../model/Usuario';
 import { handleQueryFailedError } from '../../utils/errorHandler';
 
 const rotaProduto = Router();
@@ -55,7 +58,6 @@ rotaProduto.get('/', expectAdminOrModerator, async (req, res) => {
 
         return res.status(200).json(produtos);
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ message: 'Erro de servidor' });
     }
 });
@@ -87,11 +89,15 @@ rotaProduto.get(
             });
             if (produtos.length > 0) {
                 const produto = produtos[0];
+
+                if(req.usuario.nivel === NivelUsuario.COMUM) {
+                    await ControleRegistroConsulta.register(new RegistroConsulta(produto));
+                }
+
                 return res.status(200).json(produto);
             }
             return res.status(404).json({ message: 'Não encontrado' });
         } catch (err) {
-            console.error(err);
             return res.status(500).json({ message: 'Erro de servidor' });
         }
     }

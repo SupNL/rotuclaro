@@ -15,6 +15,43 @@ export default {
         return produto;
     },
 
+    async findMostSearchProductFromThreeDays(): Promise<{
+        productName: string;
+        count: number;
+    }> {
+        interface rawResult {
+            produto_nome: string;
+            count: string;
+        }
+
+        const connection = getConnection();
+        const queryBuilder = connection
+            .getRepository(Produto)
+            .createQueryBuilder('produto');
+
+        const query = queryBuilder
+            .select('produto.nome')
+            .addSelect('COUNT(*) as count')
+            .innerJoin('registro_consulta', 'rs', 'rs.id_produto = produto.id')
+            .where('NOW() - rs.data_consulta <= INTERVAL \'3 days\'')
+            .groupBy('produto.id')
+            .orderBy('count', 'DESC');
+
+        const raw = (await query.getRawOne()) as rawResult;
+
+        if (raw) {
+            return {
+                productName: raw.produto_nome,
+                count: parseInt(raw.count),
+            };
+        } else {
+            return {
+                productName: null,
+                count: 0,
+            };
+        }
+    },
+
     findMany(findOptions?: FindManyOptions): Promise<[Produto[], number]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();

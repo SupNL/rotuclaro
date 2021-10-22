@@ -64,7 +64,6 @@ rotaSessao.post(
             }
             return res.status(401).json({ message: 'Credenciais incorretas' });
         } catch (err) {
-            console.error(err);
             return res.status(500).json({ message: 'Erro de servidor' });
         }
     }

@@ -9,6 +9,17 @@ export default {
         return perfil;
     },
 
+    count(findOptions?: FindManyOptions): Promise<number> {
+        return new Promise((resolve, reject) => {
+            const connection = getConnection();
+            const repo = connection.getRepository(Perfil);
+
+            repo.count(findOptions)
+                .then((total) => resolve(total))
+                .catch((err) => reject(err));
+        });
+    },
+
     findMany(findOptions?: FindManyOptions): Promise<Perfil[]> {
         return new Promise((resolve, reject) => {
             const connection = getConnection();
