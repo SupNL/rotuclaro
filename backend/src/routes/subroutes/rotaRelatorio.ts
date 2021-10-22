@@ -1,11 +1,8 @@
 import { Router } from 'express';
-import { FindManyOptions, MoreThan } from 'typeorm';
 import ControleComponenteAlergenico from '../../controller/ControleComponenteAlergenico';
 import ControlePerfil from '../../controller/ControlePerfil';
 import ControleProduto from '../../controller/ControleProduto';
 import ControleRegistroConsulta from '../../controller/ControleRegistroConsulta';
-import { ComponenteAlergenico } from '../../model/ComponenteAlergenico';
-import { Produto } from '../../model/Produto';
 
 const rotaRelatorio = Router();
 
