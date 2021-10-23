@@ -1,5 +1,6 @@
 import {
     BeforeInsert,
+    BeforeUpdate,
     Column,
     Entity,
     JoinColumn,
@@ -27,6 +28,11 @@ export class Usuario {
     @BeforeInsert()
     async hashPassword(): Promise<void> {
         this.senha = await hash(this.senha, 10);
+    }
+
+    @BeforeUpdate()
+    async hashPasswordOnUpdate(): Promise<void> {
+        if (this.senha) this.senha = await hash(this.senha, 10);
     }
 
     @PrimaryGeneratedColumn({ name: 'id' })
