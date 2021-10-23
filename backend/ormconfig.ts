@@ -16,8 +16,8 @@ module.exports = [
             migrationsDir: 'src/database/migration',
             subscribersDir: 'src/database/subscriber',
         },
-        ssl: true,
-        extra: {
+        ssl: (process.env.LOCAL !== 'true'),
+        extra: (process.env.LOCAL === 'true') ? undefined : {
             ssl: {
                 rejectUnauthorized: false,
             },
