@@ -27,6 +27,7 @@ export default {
             connection
                 .transaction(async (manager) => {
                     const repo = manager.getRepository(RegistroConsulta);
+                    consulta.dataConsulta = new Date();
                     return await repo.save(consulta);
                 })
                 .then((created) => {
