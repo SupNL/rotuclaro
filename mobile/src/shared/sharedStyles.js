@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import COLORS from './COLORS';
 
 export default StyleSheet.create({
     defaultScreen: {
@@ -22,3 +23,10 @@ export default StyleSheet.create({
         justifyContent: 'center',
     },
 });
+
+export const stackHeaderStyle = {
+    headerTintColor: COLORS.white,
+    headerStyle: {
+        backgroundColor: COLORS.primary,
+    },
+};

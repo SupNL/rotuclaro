@@ -5,15 +5,16 @@ const COLORS = {
 
     background : '#F2F2F2',
 
+    primary : '#4ba363',
     secondary : '#3c6f55',
     secondaryTint : '#a0e7c4',
 
     error : '#c93434',
-    warning : '#cfa602',
+    warning : '#e3c814',
     success: '#2abb2a',
 
-    errorLight : '#f79e9e',
-    warningLight : '#f5e190'
+    errorLight : '#f07d7d',
+    warningLight : '#e8cf68'
 };
 
 export default COLORS; 
