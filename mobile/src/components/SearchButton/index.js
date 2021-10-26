@@ -6,7 +6,11 @@ import COLORS from 'shared/COLORS';
 const SearchButton = ({ onPress }) => {
     return (
         <TouchableOpacity onPress={onPress}>
-            <Search stroke={COLORS.black} width={24} height={28} />
+            <Search
+                stroke={COLORS.white}
+                width={24}
+                height={28}
+            />
         </TouchableOpacity>
     );
 };
