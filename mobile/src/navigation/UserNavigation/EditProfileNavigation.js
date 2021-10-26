@@ -5,6 +5,7 @@ import ChangeProfileOptions from 'screens/User/EditProfile/ChangeProfileOptions'
 import MenuHeaderButton from 'components/MenuHeaderButton';
 import ChangeCutValues from 'screens/User/EditProfile/ChangeCutValues';
 import ChangeAlergenicComponent from 'screens/User/EditProfile/ChangeAlergenicComponent';
+import { stackHeaderStyle } from 'shared/sharedStyles';
 
 const EditProfileNavigation = () => {
     const ProfileStack = createStackNavigator();
@@ -15,6 +16,7 @@ const EditProfileNavigation = () => {
             screenOptions={({ navigation }) => ({
                 headerTitle: 'Alterar perfil',
                 headerRight: () => <MenuHeaderButton navigation={navigation} />,
+                ...stackHeaderStyle
             })}
             detachInactiveScreens={false}
         >

@@ -12,9 +12,10 @@ import { View } from 'react-native';
 import api from 'services/api';
 import ErrorInterceptor from 'utils/ErrorInterceptor';
 import ModeratorNavigation from './ModeratorNavigation';
+import COLORS from 'shared/COLORS';
 
 const Navigator = () => {
-    const { usuario, signOut } = useAuth();
+    const { usuario } = useAuth();
     const Stack = createStackNavigator();
     const [initialRoute, setInitialRoute] = useState(null);
 
@@ -43,7 +44,10 @@ const Navigator = () => {
             >
                 <Stack.Screen name='LoginNav' component={LoginNavigation} />
                 <Stack.Screen name='UserNav' component={UserNavigation} />
-                <Stack.Screen name='ModeratorNav' component={ModeratorNavigation} />
+                <Stack.Screen
+                    name='ModeratorNav'
+                    component={ModeratorNavigation}
+                />
                 <Stack.Screen name='AdminNav' component={AdminNavigation} />
             </Stack.Navigator>
         );

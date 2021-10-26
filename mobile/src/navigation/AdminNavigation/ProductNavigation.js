@@ -4,6 +4,7 @@ import MenuHeaderButton from 'components/MenuHeaderButton';
 import ListProduct from 'screens/Admin/Product/ListProduct';
 import CreateProduct from 'screens/Admin/Product/CreateProduct';
 import EditProduct from 'screens/Admin/Product/EditProduct';
+import { stackHeaderStyle } from 'shared/sharedStyles';
 
 const ProductNavigation = () => {
     const ComponentStack = createStackNavigator();
@@ -14,6 +15,7 @@ const ProductNavigation = () => {
             screenOptions={({ navigation }) => ({
                 headerTitle: 'Produtos',
                 headerRight: () => <MenuHeaderButton navigation={navigation} />,
+                ...stackHeaderStyle
             })}
             detachInactiveScreens={true}
         >

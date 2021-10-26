@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import MenuHeaderButton from 'components/MenuHeaderButton';
 import ListSuggestion from 'screens/Moderator/Suggestions/ListSuggestion';
 import CreateProduct from 'screens/Moderator/Suggestions/CreateProduct';
+import { stackHeaderStyle } from 'shared/sharedStyles';
 
 const SuggestionNavigation = () => {
     const ComponentStack = createStackNavigator();
@@ -13,6 +14,7 @@ const SuggestionNavigation = () => {
             screenOptions={({ navigation }) => ({
                 headerTitle: 'Sugestões',
                 headerRight: () => <MenuHeaderButton navigation={navigation} />,
+                ...stackHeaderStyle
             })}
             detachInactiveScreens={true}
         >

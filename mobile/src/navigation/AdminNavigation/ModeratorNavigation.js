@@ -4,6 +4,7 @@ import MenuHeaderButton from 'components/MenuHeaderButton';
 import ListModerator from 'screens/Admin/Moderator/ListModerator';
 import EditModerator from 'screens/Admin/Moderator/EditModerator';
 import CreateModerator from 'screens/Admin/Moderator/CreateModerator';
+import { stackHeaderStyle } from 'shared/sharedStyles';
 
 const ModeratorNavigation = () => {
     const ComponentStack = createStackNavigator();
@@ -14,6 +15,7 @@ const ModeratorNavigation = () => {
             screenOptions={({ navigation }) => ({
                 headerTitle: 'Moderadores',
                 headerRight: () => <MenuHeaderButton navigation={navigation} />,
+                ...stackHeaderStyle
             })}
             detachInactiveScreens={true}
         >

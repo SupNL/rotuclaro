@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import DefineBaseValue from 'screens/User/CreateProfile/DefineBaseValue';
 import DefineCutValues from 'screens/User/CreateProfile/DefineCutValues';
 import ChooseAlergenicComponents from 'screens/User/CreateProfile/ChooseAlergenicComponents';
+import { stackHeaderStyle } from 'shared/sharedStyles';
 
 const CreateProfileNavigation = () => {
     const ProfileStack = createStackNavigator();
@@ -10,7 +11,7 @@ const CreateProfileNavigation = () => {
     return (
         <ProfileStack.Navigator
             initialRouteName='DefineBaseValue'
-            screenOptions={{ headerTitle: 'Crie seu perfil'}}
+            screenOptions={{ headerTitle: 'Crie seu perfil', ...stackHeaderStyle}}
             detachInactiveScreens={false}
         >
             <ProfileStack.Screen
