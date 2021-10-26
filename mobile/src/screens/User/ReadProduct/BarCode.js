@@ -35,6 +35,14 @@ const BarCode = ({ navigation }) => {
 
     const { perfil, signOut } = useAuth();
 
+    useEffect(() => {
+        console.log({
+            productModalVisible,
+            submitIsLoading,
+            suggestionIsLoading,
+        });
+    }, [productModalVisible, submitIsLoading, suggestionIsLoading]);
+
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true);
         setProductModalVisible(true);
@@ -116,11 +124,15 @@ const BarCode = ({ navigation }) => {
         setSuggestionIsLoading(true);
         getUniqueId().then((idunico) => {
             uninterceptedApi
-                .post(`/sugestao/${code}`, {}, {
-                    headers: {
-                        idunico,
-                    },
-                })
+                .post(
+                    `/sugestao/${code}`,
+                    {},
+                    {
+                        headers: {
+                            idunico,
+                        },
+                    }
+                )
                 .then(() => {
                     ShowToast('Sugestão enviada.', ToastAndroid.TOP);
                 })
@@ -249,12 +261,17 @@ const BarCode = ({ navigation }) => {
 
     useEffect(() => {
         BarCodeScanner.getPermissionsAsync().then((res) => {
+            console.log({
+                res,
+                hasPermission,
+            });
             handleCameraPermission(
                 res,
                 hasPermission,
                 setHasPermission,
                 navigation.goBack
             );
+            setSubmitIsLoading(false);
         });
     }, [hasPermission]);
 

@@ -17,6 +17,8 @@ const ErrorInterceptor = ({api, children}) => {
         const route = url.split(API_BASEURL)[1];
         method = method.toUpperCase();
 
+        console.log(url, API_BASEURL);
+        console.log(url.split(API_BASEURL));
         console.log({ status : response.status, url : `${method} ${route}`, body : error.response.data });
         
         if(status == 401 && (route != '/sessao' || method != 'POST')) {

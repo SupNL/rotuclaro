@@ -3,7 +3,7 @@ const { BarCodeScanner } = require('expo-barcode-scanner');
 const { Linking } = require('react-native');
 
 const handleCameraPermission = (res, permission, setPermission, onFail) => {
-    if (!res.canAskAgain) {
+    if (!res.granted && !res.canAskAgain) {
         ConfirmDialog(
             'Erro de permissão',
             'A aplicação não tem permissão para usar a câmera. Atualize as permissões em configurações',
