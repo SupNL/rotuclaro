@@ -43,6 +43,10 @@ const Login = ({ navigation }) => {
                             formRef.current.setErrors({
                                 password: 'Credenciais incorretos',
                             });
+                        } else if (err.response.status == 403) {
+                            formRef.current.setErrors({
+                                username: 'Sua conta foi desativada',
+                            });
                         }
                     }
                     setSubmitIsLoading(false);

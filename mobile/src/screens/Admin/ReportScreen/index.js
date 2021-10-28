@@ -42,14 +42,10 @@ const ReportScreen = () => {
                             <ReportContent title={'Consultas realizadas hoje'}>
                                 <Header3>{summaryData.consultasHoje}</Header3>
                             </ReportContent>
-                            <ReportContent
-                                detailsNavigation={() => {}}
-                                title={'Perfis cadastrados'}
-                            >
+                            <ReportContent title={'Perfis cadastrados'}>
                                 <Header3>{summaryData.totalPerfil}</Header3>
                             </ReportContent>
                             <ReportContent
-                                detailsNavigation={() => {}}
                                 title={'Componente alergênico mais evitado'}
                             >
                                 <Header3>
@@ -60,7 +56,6 @@ const ReportScreen = () => {
                                 </Header3>
                             </ReportContent>
                             <ReportContent
-                                detailsNavigation={() => {}}
                                 title={
                                     'Produto mais consultado nos últimos três dias'
                                 }

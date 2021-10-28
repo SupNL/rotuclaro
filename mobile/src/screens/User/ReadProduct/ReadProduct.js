@@ -4,8 +4,11 @@ import { StyleSheet, View } from 'react-native';
 import CustomButton from 'components/CustomButton';
 import sharedStyles from 'shared/sharedStyles';
 import CustomText from 'components/CustomText';
+import { useAuth } from 'hooks/useAuth';
 
 const ReadProduct = ({ navigation }) => {
+
+    const { usuario } = useAuth();
 
     const handleButtonPress = () => {
         navigation.navigate('BarCode');
@@ -13,7 +16,8 @@ const ReadProduct = ({ navigation }) => {
 
     return (
         <View style={sharedStyles.alignedScreen}>
-            <CustomText style={styles.text}>Ler um produto</CustomText>
+            <CustomText style={styles.text}>Bem-vindo, {usuario.nome}!</CustomText>
+            <CustomText style={styles.text}>Vamos verificar um produto?</CustomText>
             <CustomButton
                 title='Iniciar!'
                 style={styles.button}
@@ -25,11 +29,13 @@ const ReadProduct = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     text: {
-        fontSize: 24,
+        fontSize: 20,
         marginBottom: 8,
     },
     button: {
         width: '40%',
+        marginTop: 8,
+        marginBottom: 24,
     },
 });
 

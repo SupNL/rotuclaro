@@ -69,8 +69,8 @@ const AuthProvider = ({ children, navRef }) => {
         if (data.token) {
             console.log('[AuthHook] Checking Session with available token');
             uninterceptedApi.get('/sessao').catch((err) => {
-                if(err.response) {
-                    if(err.response.status === 401) {
+                if (err.response) {
+                    if (err.response.status === 401) {
                         console.log('[AuthHook] Session expired');
                         ShowToast('Sessão expirada.');
                         signOut();
@@ -136,12 +136,27 @@ const AuthProvider = ({ children, navRef }) => {
         setData((old) => ({ ...old, perfil: new Perfil(profile) }));
     });
 
+    const updateUserData = useCallback(async (nome, login) => {
+        setData((oldData) => {
+            const oldUser = oldData.usuario;
+            return {
+                ...oldData,
+                usuario: {
+                    ...oldUser,
+                    nome,
+                    login,
+                },
+            };
+        });
+    });
+
     return (
         <AuthContext.Provider
             value={{
                 signIn,
                 signOut,
                 updateProfile,
+                updateUserData,
                 usuario: data.usuario,
                 perfil: data.perfil,
             }}

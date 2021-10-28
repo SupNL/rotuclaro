@@ -11,6 +11,7 @@ import CreateProfileNavigation from './CreateProfileNavigation';
 import { useAuth } from 'hooks/useAuth';
 import ShowToast from 'utils/ShowToast';
 import EditProfileNavigation from './EditProfileNavigation';
+import AccountSettingsNavigation from './AccountSettingsNavigation';
 
 const UserNavigation = () => {
     const UserDrawer = createDrawerNavigator();
@@ -59,6 +60,11 @@ const UserNavigation = () => {
                 name='EditProfileNavigation'
                 component={EditProfileNavigation}
                 options={{ title: 'Alterar perfil' }}
+            />
+            <UserDrawer.Screen
+                name='AccountSettingsNavigation'
+                component={AccountSettingsNavigation}
+                options={{ title: 'Minha conta' }}
             />
             {/* não clickáveis */}
             <UserDrawer.Screen
