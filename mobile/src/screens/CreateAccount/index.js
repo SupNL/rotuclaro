@@ -70,7 +70,7 @@ const CreateAccount = ({ navigation }) => {
                                 });
                             }
                         }
-                        submitIsLoading(false);
+                        setSubmitIsLoading(false);
                     });
             });
         }
