@@ -50,7 +50,7 @@ export const produtoLimiter = rateLimit({
 });
 
 export const accountCreationLimiter = rateLimit({
-    windowMs: 2 * 60 * 1000,
+    windowMs: 1000 * 60 * 60 * 2,
     max: 1,
     keyGenerator: customImeiKeyGenerator,
     skipFailedRequests: true,
