@@ -35,42 +35,34 @@ const BarCode = ({ navigation }) => {
 
     const { perfil, signOut } = useAuth();
 
-    useEffect(() => {
-        setTimeout(() => {
-            setScanned(false);
-            setSubmitIsLoading(false);
-            setProductModalVisible(false);
-            setSuggestionIsLoading(false);
-            setAlert({});
-        }, 1500);
-    }, []);
-
     const handleBarCodeScanned = ({ data }) => {
-        setScanned(true);
-        setProductModalVisible(true);
-        setSubmitIsLoading(true);
-        setCode(data);
-        getUniqueId().then((idunico) => {
-            api.get(`/produto/${data}`, {
-                headers: {
-                    idunico,
-                },
-            })
-                .then((res) => {
-                    setProduct(res.data);
-                    const avisos = perfil.informarRestricoes(res.data);
-                    setAlert(avisos);
+        if (data) {
+            setScanned(true);
+            setProductModalVisible(true);
+            setSubmitIsLoading(true);
+            setCode(data);
+            getUniqueId().then((idunico) => {
+                api.get(`/produto/${data}`, {
+                    headers: {
+                        idunico,
+                    },
                 })
-                .catch((err) => {
-                    setProduct(null);
-                    if (err.response) {
-                        setError(err.response);
-                    } else {
-                        setError(err);
-                    }
-                })
-                .finally(() => setSubmitIsLoading(false));
-        });
+                    .then((res) => {
+                        setProduct(res.data);
+                        const avisos = perfil.informarRestricoes(res.data);
+                        setAlert(avisos);
+                    })
+                    .catch((err) => {
+                        setProduct(null);
+                        if (err.response) {
+                            setError(err.response);
+                        } else {
+                            setError(err);
+                        }
+                    })
+                    .finally(() => setSubmitIsLoading(false));
+            });
+        }
     };
 
     useEffect(() => {
@@ -262,14 +254,24 @@ const BarCode = ({ navigation }) => {
     );
 
     useEffect(() => {
-        BarCodeScanner.getPermissionsAsync().then((res) => {
-            handleCameraPermission(
-                res,
-                hasPermission,
-                setHasPermission,
-                navigation.goBack
-            );
-        }).finally(() => setSubmitIsLoading(false));
+        if (!hasPermission) {
+            BarCodeScanner.getPermissionsAsync()
+                .then((res) => {
+                    handleCameraPermission(
+                        res,
+                        hasPermission,
+                        setHasPermission,
+                        navigation.goBack
+                    );
+                })
+                .finally(() => {
+                    setScanned(false);
+                    setSubmitIsLoading(false);
+                    setProductModalVisible(false);
+                    setSuggestionIsLoading(false);
+                    setAlert({});
+                });
+        }
     }, [hasPermission]);
 
     return (
