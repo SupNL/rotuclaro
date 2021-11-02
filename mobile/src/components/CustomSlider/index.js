@@ -5,6 +5,7 @@ import { useState } from 'react';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import COLORS from 'shared/COLORS';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import CustomText from 'components/CustomText';
 
 function CustomSlider({
     name,
@@ -90,6 +91,7 @@ function CustomSlider({
                         {suffix}
                     </Text>
                 )}
+                <CustomText style={{ marginTop : 8, fontSize: 14 }}>Informar valores manualmente</CustomText>
             </TouchableOpacity>
             <MultiSlider
                 isMarkersSeparated={true}
