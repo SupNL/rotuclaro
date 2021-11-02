@@ -39,6 +39,7 @@ const ChangeAlergenicComponent = ({ navigation }) => {
                 const dummyProfile = new Perfil(newProfile);
                 updateProfile(dummyProfile).then(() => {
                     ShowToast('Perfil atualizado');
+                    setSubmitIsLoading(false);
                     navigation.goBack();
                 });
             })
