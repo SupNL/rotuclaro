@@ -96,11 +96,13 @@ const ChooseAlergenicComponents = ({ navigation, route }) => {
         api.post('/perfil', submitData)
             .then((res) => {
                 ShowToast('Perfil cadastrado!');
-                updateProfile(res.data).then(() =>
-                    navigation.navigate('ReadProductNav')
-                );
+                updateProfile(res.data).then(() => {
+                    setSubmitIsLoading(false);
+                    navigation.navigate('ReadProductNav');
+                });
             })
             .catch((err) => {
+                setSubmitIsLoading(false);
                 if (err.response && err.response.status == 409) {
                     ShowToast('Perfil já cadastrado.');
                     navigation.navigate('ReadProductNav');
