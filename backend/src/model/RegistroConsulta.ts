@@ -19,7 +19,7 @@ export class RegistroConsulta {
     dataConsulta : Date;
 
     @ManyToOne(() => Produto, {
-        nullable: false,
+        nullable: false, onDelete : 'CASCADE'
     })
     @JoinColumn({ name: 'id_produto' })
     produto: Produto;
