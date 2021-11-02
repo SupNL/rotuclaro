@@ -36,12 +36,14 @@ const BarCode = ({ navigation }) => {
     const { perfil, signOut } = useAuth();
 
     useEffect(() => {
-        console.log({
-            productModalVisible,
-            submitIsLoading,
-            suggestionIsLoading,
-        });
-    }, [productModalVisible, submitIsLoading, suggestionIsLoading]);
+        setTimeout(() => {
+            setScanned(false);
+            setSubmitIsLoading(false);
+            setProductModalVisible(false);
+            setSuggestionIsLoading(false);
+            setAlert({});
+        }, 1500);
+    }, []);
 
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true);
@@ -261,18 +263,13 @@ const BarCode = ({ navigation }) => {
 
     useEffect(() => {
         BarCodeScanner.getPermissionsAsync().then((res) => {
-            console.log({
-                res,
-                hasPermission,
-            });
             handleCameraPermission(
                 res,
                 hasPermission,
                 setHasPermission,
                 navigation.goBack
             );
-            setSubmitIsLoading(false);
-        });
+        }).finally(() => setSubmitIsLoading(false));
     }, [hasPermission]);
 
     return (
