@@ -4,14 +4,13 @@ import { NivelUsuario } from '../model/Usuario';
 
 function customImeiKeyGenerator(req: Request) {
     const idunico = req.headers.idunico;
-    return `${req.ip}+${idunico}`;
+    return `${idunico}`;
 }
 
 function customImeiKeyPlusCodeGenerator(req: Request) {
     const idunico = req.headers.idunico;
     const codigo = req.params['codigo'];
-    console.log(`${req.ip}+${idunico}+${codigo}`);
-    return `${req.ip}+${idunico}+${codigo}`;
+    return `${idunico}+${codigo}`;
 }
 
 export const serverLimiter = rateLimit({
