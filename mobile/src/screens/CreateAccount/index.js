@@ -68,6 +68,10 @@ const CreateAccount = ({ navigation }) => {
                                 formRef.current.setErrors({
                                     username: 'Esse login já está em uso.',
                                 });
+                            } else if (err.response.status == 429) {
+                                formRef.current.setErrors({
+                                    username: 'Você criou uma conta recentemente. Tente novamente depois.',
+                                });
                             }
                         }
                         setSubmitIsLoading(false);
