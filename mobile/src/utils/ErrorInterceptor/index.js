@@ -18,7 +18,6 @@ const ErrorInterceptor = ({api, children}) => {
         method = method.toUpperCase();
 
         console.log(url, API_BASEURL);
-        console.log(url.split(API_BASEURL));
         console.log({ status : response.status, url : `${method} ${route}`, body : error.response.data });
         
         if(status == 401 && (route != '/sessao' || method != 'POST')) {
@@ -26,7 +25,7 @@ const ErrorInterceptor = ({api, children}) => {
             signOut();
         } else if (status == 429) {
             ShowToast('Muitas requisições feitas. Aguarde antes de tentar novamente.', ToastAndroid.TOP);
-        } else if (status == 500) {
+        } else if (status >= 500 && status <= 599) {
             ShowToast('Ocorreu um erro no servidor.', ToastAndroid.TOP);
         }
     };
