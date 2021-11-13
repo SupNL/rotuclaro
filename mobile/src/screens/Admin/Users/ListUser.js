@@ -117,7 +117,7 @@ const ListUser = ({ navigation }) => {
             <SearchModal
                 visible={visibleModal}
                 setVisible={setVisibleModal}
-                label='Nome do moderador'
+                label='Nome do usuário'
                 setInfo={setName}
                 toggleSearch={setSearch}
             />
