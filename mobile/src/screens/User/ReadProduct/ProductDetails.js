@@ -10,6 +10,8 @@ import Header3 from 'components/Headers/Header3';
 const ProductDetails = ({ route, navigation }) => {
     const { alert, profile, product } = route.params;
 
+    console.log(product);
+
     const screenWidth = Dimensions.get('window').width;
 
     const handleButtonPress = () => {

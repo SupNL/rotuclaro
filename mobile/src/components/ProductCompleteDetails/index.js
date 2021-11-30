@@ -101,21 +101,13 @@ const ProductCompleteDetails = ({ alert, product }) => {
         <View style={{ ...styles.wrapper }}>
             {alert.componentes && alert.items ? (
                 <>
-                    {alert.componentes.length > 0 && (
+                    {product.componentesAlergenicos.length > 0 && (
                         <View style={styles.dangerAlergenicWrapper}>
                             {renderAlergenicAlert(product.componentesAlergenicos)}
                         </View>
                     )}
                     {alert.items.length > 0 &&
                         renderComponentsAlert(alert.items)}
-                    <View>
-                        {alert.items.length == 0 &&
-                            alert.componentes.length == 0 && (
-                                <CustomText style={styles.safeProductText}>
-                                    Produto em conformidade com seu perfil.
-                                </CustomText>
-                            )}
-                    </View>
                 </>
             ) : (
                 <CustomText>Aguarde..</CustomText>
