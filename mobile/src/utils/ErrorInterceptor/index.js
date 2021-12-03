@@ -20,7 +20,7 @@ const ErrorInterceptor = ({api, children}) => {
         console.log(url, API_BASEURL);
         console.log({ status : response.status, url : `${method} ${route}`, body : error.response.data });
         
-        if(status == 401 && (route != '/sessao' || method != 'POST')) {
+        if(status == 401 && method != 'POST') {
             ShowToast('Sessão expirada.', ToastAndroid.TOP);
             signOut();
         } else if (status == 429) {
