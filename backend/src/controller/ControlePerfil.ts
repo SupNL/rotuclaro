@@ -1,6 +1,6 @@
 import { FindManyOptions, FindOneOptions, getConnection } from 'typeorm';
 import { Perfil } from '../model/Perfil';
-
+// test
 export default {
     convertBody(entityBody: Partial<Perfil>): Perfil {
         const connection = getConnection();
